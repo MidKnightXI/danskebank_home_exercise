@@ -77,7 +77,7 @@ public class TemplateController : ControllerBase
         return Ok(new List<TemplateEntity>());
     }
 
-    [HttpPost("send/{id}")]
+    [HttpPost("{id}/send")]
     public ActionResult SendTemplate(Guid id, [FromBody] Customer customer)
     {
         if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
