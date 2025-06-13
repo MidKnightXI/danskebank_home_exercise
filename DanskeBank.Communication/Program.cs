@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using DanskeBank.Communication.Databases;
+using DanskeBank.Communication.Repositories.Interfaces;
+using DanskeBank.Communication.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +16,15 @@ if (app.Environment.IsDevelopment())
     builder.Services.AddSwaggerGen();
 }
 
-// database
+// databases
 builder.Services.AddDbContext<CommunicationDbContext>(options =>
     options.UseSqlite("Data Source=communication.db")
 );
+
+// repositories
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ITemplateRepository, TemplateRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 app.UseRouting();
 
