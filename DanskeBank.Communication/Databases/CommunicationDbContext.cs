@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Databases.Entities;
 
 namespace DanskeBank.Communication.Databases;
 
@@ -9,14 +9,14 @@ public class CommunicationDbContext : DbContext
     {
     }
 
-    public DbSet<CustomerModel> Customers { get; set; }
-    public DbSet<TemplateModel> Templates { get; set; }
-    public DbSet<UserModel> Users { get; set; }
+    public DbSet<CustomerEntity> Customers { get; set; }
+    public DbSet<TemplateEntity> Templates { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<CustomerModel>().HasIndex(c => c.Id).IsUnique();
-        modelBuilder.Entity<TemplateModel>().HasIndex(t => t.Id).IsUnique();
-        modelBuilder.Entity<UserModel>().HasIndex(u => u.Id).IsUnique();
+        modelBuilder.Entity<CustomerEntity>().HasIndex(c => c.Id).IsUnique();
+        modelBuilder.Entity<TemplateEntity>().HasIndex(t => t.Id).IsUnique();
+        modelBuilder.Entity<UserEntity>().HasIndex(u => u.Id).IsUnique();
     }
 }
