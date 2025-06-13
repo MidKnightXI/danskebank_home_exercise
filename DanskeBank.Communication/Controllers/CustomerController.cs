@@ -27,7 +27,7 @@ public class CustomerController : ControllerBase
             return Ok(new CustomersResponse
             {
                 Success = true,
-                Customers = customers.Select(c => c.ToDto()).ToList()
+                Customers = customers.ToDtoList()
             });
         }
         catch (Exception ex)
@@ -169,7 +169,7 @@ public class CustomerController : ControllerBase
             return Ok(new CustomersResponse
             {
                 Success = true,
-                Customers = customers.Select(c => c.ToDto()).ToList()
+                Customers = customers.ToDtoList()
             });
         }
         catch (Exception ex)
