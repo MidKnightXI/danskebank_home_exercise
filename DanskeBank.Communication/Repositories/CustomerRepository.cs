@@ -16,6 +16,11 @@ public class CustomerRepository : ICustomerRepository
         _dbContext = dbContext;
     }
 
+    public async Task<List<CustomerEntity>> ListAsync()
+    {
+        return await _dbContext.Customers.ToListAsync();
+    }
+
     public async Task<CustomerEntity> GetByIdAsync(Guid id)
     {
         var customerEntity = await _dbContext.Customers.FindAsync(id);
@@ -36,12 +41,7 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task UpdateAsync(Guid id, Customer customer)
     {
-        var customerEntity = await _dbContext.Customers.FindAsync(id);
-        if (customerEntity is null)
-        {
-            return;
-        }
-
+        var customerEntity = await _dbContext.Customers.FindAsync(id) ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
         customerEntity.Name = customer.Name;
         customerEntity.Email = customer.Email;
 
@@ -51,12 +51,7 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task DeleteAsync(Guid id)
     {
-        var customerEntity = await _dbContext.Customers.FindAsync(id);
-        if (customerEntity is null)
-        {
-            return;
-        }
-
+        var customerEntity = await _dbContext.Customers.FindAsync(id) ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
         _dbContext.Customers.Remove(customerEntity);
         await _dbContext.SaveChangesAsync();
     }
@@ -66,10 +61,5 @@ public class CustomerRepository : ICustomerRepository
         return await _dbContext.Customers
             .Where(c => c.Name.Contains(query) || c.Email.Contains(query))
             .ToListAsync();
-    }
-
-    public async Task<List<CustomerEntity>> ListAsync()
-    {
-        return await _dbContext.Customers.ToListAsync();
     }
 }
