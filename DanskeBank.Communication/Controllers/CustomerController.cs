@@ -1,5 +1,6 @@
 using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,23 +18,59 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<CustomerEntity>> GetCustomers()
+    public async Task<ActionResult<CustomersResponse>> GetCustomers()
     {
-        return Ok(new List<CustomerEntity>());
+        try
+        {
+            var customers = await _customerRepository.ListAsync();
+            return Ok(new CustomersResponse
+            {
+                Success = true,
+                Customers = customers
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new CustomersResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpGet("{id}")]
-    public ActionResult<CustomerEntity> GetCustomer(Guid id)
+    public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id)
     {
-        return Ok(new CustomerEntity { Id = id, Name = "Sample Customer", Email = "customer@example.com" });
+        try
+        {
+            var customer = await _customerRepository.GetByIdAsync(id);
+          return Ok(new CustomerResponse()
+            {
+                Success = true,
+                Customer = customer
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new CustomerResponse()
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpPost]
-    public ActionResult<CustomerEntity> CreateCustomer([FromBody] Customer customer)
+    public async Task<ActionResult<CustomerResponse>> CreateCustomer([FromBody] Customer customer)
     {
         if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
         {
-            return BadRequest("Invalid customer data.");
+            return BadRequest(new CustomerResponse()
+            {
+                Success = false,
+                Message = "Invalid customer data."
+            });
         }
         var customerEntity = new CustomerEntity
         {
@@ -41,35 +78,106 @@ public class CustomerController : ControllerBase
             Name = customer.Name,
             Email = customer.Email
         };
-        return CreatedAtAction(nameof(GetCustomer), new { id = customerEntity.Id }, customerEntity);
+        try
+        {
+            await _customerRepository.AddAsync(customerEntity);
+            return CreatedAtAction(nameof(GetCustomer), new { id = customerEntity.Id }, new CustomerResponse()
+            {
+                Success = true,
+                Customer = customerEntity
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new CustomerResponse()
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpPut("{id}")]
-    public ActionResult<CustomerEntity> UpdateCustomer(Guid id, [FromBody] Customer customer)
+    public async Task<ActionResult<CustomerResponse>> UpdateCustomer(Guid id, [FromBody] Customer customer)
     {
         if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
         {
-            return BadRequest("Invalid customer data.");
+            return BadRequest(new CustomerResponse()
+            {
+                Success = false,
+                Message = "Invalid customer data."
+            });
         }
-
         var customerEntity = new CustomerEntity
         {
             Id = id,
             Name = customer.Name,
             Email = customer.Email
         };
-        return Ok(customerEntity);
+        try
+        {
+            await _customerRepository.UpdateAsync(id, customerEntity);
+            return Ok(new CustomerResponse()
+            {
+                Success = true,
+                Customer = customerEntity
+            });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new CustomerResponse()
+            {
+                Success = false,
+                Message = $"Customer with ID {id} not found."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new CustomerResponse()
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteCustomer(Guid id)
+    public async Task<ActionResult> DeleteCustomer(Guid id)
     {
-        return NoContent();
+        try
+        {
+            await _customerRepository.GetByIdAsync(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { Success = false, Message = $"Customer with ID {id} not found." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Success = false, ex.Message });
+        }
     }
 
     [HttpGet("search")]
-    public ActionResult<List<CustomerEntity>> SearchCustomers([FromQuery] string query)
+    public async Task<ActionResult<CustomersResponse>> SearchCustomers([FromQuery] string query)
     {
-        return Ok(new List<CustomerEntity>());
+        try
+        {
+            var customers = await _customerRepository.SearchAsync(query);
+            return Ok(new CustomersResponse
+            {
+                Success = true,
+                Customers = customers
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new CustomersResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 }
