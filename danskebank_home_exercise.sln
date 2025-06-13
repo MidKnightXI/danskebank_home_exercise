@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DanskeBank.Communication.Tests", "DanskeBank.Communication.Tests\DanskeBank.Communication.Tests.csproj", "{5EBB2131-F26C-6BF1-9339-97F1DDB86A23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DanskeBank.Communication", "DanskeBank.Communication\DanskeBank.Communication.csproj", "{B4DC9C4B-D672-ED11-5970-0CE9EAFD4D6E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EBB2131-F26C-6BF1-9339-97F1DDB86A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EBB2131-F26C-6BF1-9339-97F1DDB86A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EBB2131-F26C-6BF1-9339-97F1DDB86A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EBB2131-F26C-6BF1-9339-97F1DDB86A23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4DC9C4B-D672-ED11-5970-0CE9EAFD4D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4DC9C4B-D672-ED11-5970-0CE9EAFD4D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4DC9C4B-D672-ED11-5970-0CE9EAFD4D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4DC9C4B-D672-ED11-5970-0CE9EAFD4D6E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C3B52398-22A2-4AF3-955F-159B16306F46}
+	EndGlobalSection
+EndGlobal
