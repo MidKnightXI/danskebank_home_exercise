@@ -1,5 +1,6 @@
 using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DanskeBank.Communication.Controllers;
@@ -8,6 +9,15 @@ namespace DanskeBank.Communication.Controllers;
 [Route("api/v1/templates")]
 public class TemplateController : ControllerBase
 {
+    private readonly ITemplateRepository _templateRepository;
+    private readonly ICustomerRepository _customerRepository;
+
+    public TemplateController(ITemplateRepository templateRepository, ICustomerRepository customerRepository)
+    {
+        _templateRepository = templateRepository;
+        _customerRepository = customerRepository;
+    }
+
     [HttpGet]
     public ActionResult<List<TemplateEntity>> GetTemplates()
     {

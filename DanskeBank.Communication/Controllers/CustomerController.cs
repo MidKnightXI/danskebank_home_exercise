@@ -1,5 +1,6 @@
 using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DanskeBank.Communication.Controllers;
@@ -8,6 +9,13 @@ namespace DanskeBank.Communication.Controllers;
 [Route("api/v1/customers")]
 public class CustomerController : ControllerBase
 {
+    private readonly ICustomerRepository _customerRepository;
+
+    public CustomerController(ICustomerRepository customerRepository)
+    {
+        _customerRepository = customerRepository;
+    }
+
     [HttpGet]
     public ActionResult<List<CustomerEntity>> GetCustomers()
     {
