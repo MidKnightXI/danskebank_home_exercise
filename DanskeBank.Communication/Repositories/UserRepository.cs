@@ -29,42 +29,34 @@ public class UserRepository : IUserRepository
 
     public async Task DeleteAsync(Guid id)
     {
-        var userEntity = await _dbContext.Users.FindAsync(id);
-        if (userEntity is null)
-        {
-            return;
-        }
-
+        var userEntity = await _dbContext.Users.FindAsync(id)
+            ?? throw new KeyNotFoundException($"User with ID {id} not found.");
         _dbContext.Users.Remove(userEntity);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task<UserEntity> GetByIdAsync(Guid id)
     {
-        var userEntity = await _dbContext.Users.FindAsync(id);
-        return userEntity ?? throw new KeyNotFoundException($"User with ID {id} not found.");
+        return await _dbContext.Users.FindAsync(id)
+            ?? throw new KeyNotFoundException($"User with ID {id} not found.");
     }
 
     public async Task<List<UserEntity>> ListAsync()
     {
-        return await _dbContext.Users.ToListAsync();
+        return await _dbContext.Users.AsNoTracking().ToListAsync();
     }
 
     public async Task<List<UserEntity>> SearchAsync(string query)
     {
-        return await _dbContext.Users
+        return await _dbContext.Users.AsNoTracking()
             .Where(u => u.Email.Contains(query))
             .ToListAsync();
     }
 
     public async Task UpdateAsync(Guid id, User user)
     {
-        var userEntity = await _dbContext.Users.FindAsync(id);
-        if (userEntity is null)
-        {
-            return;
-        }
-
+        var userEntity = await _dbContext.Users.FindAsync(id)
+            ?? throw new KeyNotFoundException($"User with ID {id} not found.");
         userEntity.Email = user.Email;
         userEntity.Password = user.Password;
 
