@@ -1,4 +1,5 @@
 using DanskeBank.Communication.Databases.Entities;
+using DanskeBank.Communication.Extensions;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories.Interfaces;
@@ -26,7 +27,7 @@ public class CustomerController : ControllerBase
             return Ok(new CustomersResponse
             {
                 Success = true,
-                Customers = customers
+                Customers = customers.Select(c => c.ToDto()).ToList()
             });
         }
         catch (Exception ex)
@@ -48,7 +49,7 @@ public class CustomerController : ControllerBase
           return Ok(new CustomerResponse()
             {
                 Success = true,
-                Customer = customer
+                Customer = customer.ToDto()
             });
         }
         catch (Exception ex)
@@ -84,7 +85,7 @@ public class CustomerController : ControllerBase
             return CreatedAtAction(nameof(GetCustomer), new { id = customerEntity.Id }, new CustomerResponse()
             {
                 Success = true,
-                Customer = customerEntity
+                Customer = customerEntity.ToDto()
             });
         }
         catch (Exception ex)
@@ -120,7 +121,7 @@ public class CustomerController : ControllerBase
             return Ok(new CustomerResponse()
             {
                 Success = true,
-                Customer = customerEntity
+                Customer = customerEntity.ToDto()
             });
         }
         catch (KeyNotFoundException)
@@ -168,7 +169,7 @@ public class CustomerController : ControllerBase
             return Ok(new CustomersResponse
             {
                 Success = true,
-                Customers = customers
+                Customers = customers.Select(c => c.ToDto()).ToList()
             });
         }
         catch (Exception ex)
