@@ -16,7 +16,7 @@ public class CustomerRepository : ICustomerRepository
         _dbContext = dbContext;
     }
 
-    public async Task AddAsync(Customer customer)
+    public async Task<CustomerEntity> AddAsync(Customer customer)
     {
         var customerEntity = new CustomerEntity
         {
@@ -26,6 +26,7 @@ public class CustomerRepository : ICustomerRepository
         };
         await _dbContext.Customers.AddAsync(customerEntity);
         await _dbContext.SaveChangesAsync();
+        return customerEntity;
     }
 
     public async Task DeleteAsync(Guid id)

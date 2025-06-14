@@ -73,15 +73,9 @@ public class CustomerController : ControllerBase
                 Message = "Invalid customer data."
             });
         }
-        var customerEntity = new CustomerEntity
-        {
-            Id = Guid.NewGuid(),
-            Name = customer.Name,
-            Email = customer.Email
-        };
         try
         {
-            await _customerRepository.AddAsync(customerEntity);
+            var customerEntity = await _customerRepository.AddAsync(customer);
             return CreatedAtAction(nameof(GetCustomer), new { id = customerEntity.Id }, new CustomerResponse()
             {
                 Success = true,
