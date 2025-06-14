@@ -10,11 +10,17 @@ namespace DanskeBank.Communication.Controllers;
 [Route("api/v1/templates")]
 public class TemplateController : ControllerBase
 {
+    private readonly ILogger<TemplateController> _logger;
     private readonly ITemplateRepository _templateRepository;
     private readonly ICustomerRepository _customerRepository;
 
-    public TemplateController(ITemplateRepository templateRepository, ICustomerRepository customerRepository)
+    public TemplateController(
+        ILogger<TemplateController> logger,
+        ITemplateRepository templateRepository,
+        ICustomerRepository customerRepository
+    )
     {
+        _logger = logger;
         _templateRepository = templateRepository;
         _customerRepository = customerRepository;
     }
@@ -184,6 +190,8 @@ public class TemplateController : ControllerBase
             template.Body = template.Body
                 .Replace("{{CustomerName}}", customer.Name)
                 .Replace("{{CustomerEmail}}", customer.Email);
+
+            _logger.LogInformation($"Sending template '{template.Name}' to customer '{customer.Name}' ({customer.Email}) with body: {template.Body}");
 
             return Ok(new BaseResponse
             {
