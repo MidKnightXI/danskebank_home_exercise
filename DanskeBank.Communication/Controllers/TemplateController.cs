@@ -1,5 +1,6 @@
-using DanskeBank.Communication.Databases.Entities;
+using DanskeBank.Communication.Extensions;
 using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,72 +20,193 @@ public class TemplateController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<TemplateEntity>> GetTemplates()
+    public async Task<ActionResult<TemplatesResponse>> GetTemplates()
     {
-        return Ok(new List<TemplateEntity>());
+        try
+        {
+            var templates = await _templateRepository.ListAsync();
+            return Ok(new TemplatesResponse
+            {
+                Success = true,
+                Templates = templates.ToDtoList()
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new TemplatesResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpGet("{id}")]
-    public ActionResult<TemplateEntity> GetTemplate(Guid id)
+    public async Task<ActionResult<TemplateResponse>> GetTemplate(Guid id)
     {
-        return Ok(new TemplateEntity { Id = id, Name = "Sample Template", Subject = "Template Subject", Body = "Template content" });
+        try
+        {
+            var template = await _templateRepository.GetByIdAsync(id);
+            return Ok(new TemplateResponse
+            {
+                Success = true,
+                Template = template.ToDto()
+            });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new TemplateResponse
+            {
+                Success = false,
+                Message = $"Template with ID {id} not found."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new TemplateResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpPost]
-    public ActionResult<TemplateEntity> CreateTemplate([FromBody] Template template)
+    public async Task<ActionResult<TemplateResponse>> CreateTemplate([FromBody] Template template)
     {
-        if (template == null || string.IsNullOrEmpty(template.Name) || string.IsNullOrEmpty(template.Body))
+        try
         {
-            return BadRequest("Invalid template data.");
+            var templateEntity = await _templateRepository.AddAsync(template);
+
+            return CreatedAtAction(nameof(GetTemplate), new { id = templateEntity.Id }, new TemplateResponse
+            {
+                Success = true,
+                Template = templateEntity.ToDto()
+            });
         }
-        var templateEntity = new TemplateEntity
+        catch (Exception ex)
         {
-            Id = Guid.NewGuid(),
-            Name = template.Name,
-            Subject = template.Subject,
-            Body = template.Body
-        };
-        return CreatedAtAction(nameof(GetTemplate), new { id = templateEntity.Id }, templateEntity);
+            return StatusCode(500, new TemplateResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpPut("{id}")]
-    public ActionResult<TemplateEntity> UpdateTemplate(Guid id, [FromBody] Template template)
+    public async Task<ActionResult<TemplateResponse>> UpdateTemplate(Guid id, [FromBody] Template template)
     {
-        if (template == null || string.IsNullOrEmpty(template.Name) || string.IsNullOrEmpty(template.Body))
+        try
         {
-            return BadRequest("Invalid template data.");
-        }
+            var templateEntity = await _templateRepository.UpdateAsync(id, template);
 
-        var templateEntity = new TemplateEntity
+            return Ok(new TemplateResponse
+            {
+                Success = true,
+                Template = templateEntity.ToDto()
+            });
+        }
+        catch (KeyNotFoundException)
         {
-            Id = id,
-            Name = template.Name,
-            Subject = template.Subject,
-            Body = template.Body
-        };
-        return Ok(templateEntity);
+            return NotFound(new TemplateResponse
+            {
+                Success = false,
+                Message = $"Template with ID {id} not found."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new TemplateResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteTemplate(Guid id)
+    public async Task<ActionResult<BaseResponse>> DeleteTemplate(Guid id)
     {
-        return NoContent();
+        try
+        {
+            await _templateRepository.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new BaseResponse
+            {
+                Success = false,
+                Message = $"Template with ID {id} not found."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new BaseResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpGet("search")]
-    public ActionResult<List<TemplateEntity>> SearchTemplates([FromQuery] string query)
+    public async Task<ActionResult<TemplatesResponse>> SearchTemplates([FromQuery] string query)
     {
-        return Ok(new List<TemplateEntity>());
+        try
+        {
+            var templates = await _templateRepository.SearchAsync(query);
+            return Ok(new TemplatesResponse
+            {
+                Success = true,
+                Templates = templates.ToDtoList()
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new TemplatesResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
-    [HttpPost("{id}/send")]
-    public ActionResult SendTemplate(Guid id, [FromBody] Customer customer)
+    [HttpPost("{templateId}/send/{customerId}")]
+    public async Task<ActionResult<BaseResponse>> SendTemplate(Guid templateId, Guid customerId)
     {
-        if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
+        try
         {
-            return BadRequest("Invalid customer data.");
-        }
+            var template = await _templateRepository.GetByIdAsync(templateId);
+            var customer = await _customerRepository.GetByIdAsync(customerId);
 
-        return Ok($"Template {id} sent to {customer.Name} at {customer.Email}.");
+            if (template is null || customer is null)
+            {
+                return NotFound(new BaseResponse
+                {
+                    Success = false,
+                    Message = "Template or customer not found."
+                });
+            }
+
+            template.Body = template.Body
+                .Replace("{{CustomerName}}", customer.Name)
+                .Replace("{{CustomerEmail}}", customer.Email);
+
+            return Ok(new BaseResponse
+            {
+                Success = true,
+                Message = "Template sent successfully."
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new BaseResponse
+            {
+                Success = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 }
