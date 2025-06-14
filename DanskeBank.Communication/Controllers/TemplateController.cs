@@ -181,15 +181,6 @@ public class TemplateController : ControllerBase
             var template = await _templateRepository.GetByIdAsync(templateId);
             var customer = await _customerRepository.GetByIdAsync(customerId);
 
-            if (template is null || customer is null)
-            {
-                return NotFound(new BaseResponse
-                {
-                    Success = false,
-                    Message = "Template or customer not found."
-                });
-            }
-
             template.Body = template.Body
                 .Replace("{{CustomerName}}", customer.Name)
                 .Replace("{{CustomerEmail}}", customer.Email);
@@ -198,6 +189,14 @@ public class TemplateController : ControllerBase
             {
                 Success = true,
                 Message = "Template sent successfully."
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new BaseResponse
+            {
+                Success = false,
+                Message = ex.Message
             });
         }
         catch (Exception ex)
