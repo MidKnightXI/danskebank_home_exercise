@@ -15,7 +15,7 @@ public class TemplateRepository : ITemplateRepository
         _context = context;
     }
 
-    public Task AddAsync(Template template)
+    public async Task<TemplateEntity> AddAsync(Template template)
     {
         var templateEntity = new TemplateEntity
         {
@@ -25,8 +25,9 @@ public class TemplateRepository : ITemplateRepository
             Body = template.Body,
         };
 
-        _context.Templates.Add(templateEntity);
-        return _context.SaveChangesAsync();
+        await _context.Templates.AddAsync(templateEntity);
+        await _context.SaveChangesAsync();
+        return templateEntity;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -55,7 +56,7 @@ public class TemplateRepository : ITemplateRepository
             .ToListAsync();
     }
 
-    public async Task UpdateAsync(Guid id, Template template)
+    public async Task<TemplateEntity> UpdateAsync(Guid id, Template template)
     {
         var templateEntity = await _context.Templates.FindAsync(id)
             ?? throw new KeyNotFoundException($"Template with ID {id} not found.");
@@ -65,5 +66,7 @@ public class TemplateRepository : ITemplateRepository
 
         _context.Templates.Update(templateEntity);
         await _context.SaveChangesAsync();
+
+        return templateEntity;
     }
 }

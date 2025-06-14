@@ -6,8 +6,8 @@ namespace DanskeBank.Communication.Repositories.Interfaces;
 public interface ITemplateRepository
 {
     Task<TemplateEntity> GetByIdAsync(Guid id);
-    Task AddAsync(Template template);
-    Task UpdateAsync(Guid id, Template template);
+    Task<TemplateEntity> AddAsync(Template template);
+    Task<TemplateEntity> UpdateAsync(Guid id, Template template);
     Task DeleteAsync(Guid id);
     Task<List<TemplateEntity>> SearchAsync(string query);
     Task<List<TemplateEntity>> ListAsync();
