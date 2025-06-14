@@ -101,23 +101,9 @@ public class CustomerController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<CustomerResponse>> UpdateCustomer(Guid id, [FromBody] Customer customer)
     {
-        if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
-        {
-            return BadRequest(new CustomerResponse()
-            {
-                Success = false,
-                Message = "Invalid customer data."
-            });
-        }
-        var customerEntity = new CustomerEntity
-        {
-            Id = id,
-            Name = customer.Name,
-            Email = customer.Email
-        };
         try
         {
-            await _customerRepository.UpdateAsync(id, customerEntity);
+            var customerEntity = await _customerRepository.UpdateAsync(id, customer);
             return Ok(new CustomerResponse()
             {
                 Success = true,

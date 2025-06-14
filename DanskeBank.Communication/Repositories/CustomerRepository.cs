@@ -54,7 +54,7 @@ public class CustomerRepository : ICustomerRepository
             .ToListAsync();
     }
 
-    public async Task UpdateAsync(Guid id, Customer customer)
+    public async Task<CustomerEntity> UpdateAsync(Guid id, Customer customer)
     {
         var customerEntity = await _dbContext.Customers.FindAsync(id)
             ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
@@ -63,5 +63,7 @@ public class CustomerRepository : ICustomerRepository
 
         _dbContext.Customers.Update(customerEntity);
         await _dbContext.SaveChangesAsync();
+
+        return customerEntity;
     }
 }
