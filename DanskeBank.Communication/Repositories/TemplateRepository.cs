@@ -8,11 +8,11 @@ namespace DanskeBank.Communication.Repositories;
 
 public class TemplateRepository : ITemplateRepository
 {
-    private readonly CommunicationDbContext _context;
+    private readonly CommunicationDbContext _dbContext;
 
     public TemplateRepository(CommunicationDbContext context)
     {
-        _context = context;
+        _dbContext = context;
     }
 
     public async Task<TemplateEntity> AddAsync(Template template)
@@ -25,48 +25,49 @@ public class TemplateRepository : ITemplateRepository
             Body = template.Body,
         };
 
-        await _context.Templates.AddAsync(templateEntity);
-        await _context.SaveChangesAsync();
+        await _dbContext.Templates.AddAsync(templateEntity);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.Entry(templateEntity).State = EntityState.Detached;
         return templateEntity;
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var templateEntity = await _context.Templates.FindAsync(id)
+        var templateEntity = await _dbContext.Templates.FindAsync(id)
             ?? throw new KeyNotFoundException($"Template with ID {id} not found.");
-        _context.Templates.Remove(templateEntity);
-        await _context.SaveChangesAsync();
+        _dbContext.Templates.Remove(templateEntity);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<TemplateEntity> GetByIdAsync(Guid id)
     {
-        return await _context.Templates.FindAsync(id)
+        return await _dbContext.Templates.FindAsync(id)
             ?? throw new KeyNotFoundException($"Template with ID {id} not found.");
     }
 
     public async Task<List<TemplateEntity>> ListAsync()
     {
-        return await _context.Templates.AsNoTracking().ToListAsync();
+        return await _dbContext.Templates.AsNoTracking().ToListAsync();
     }
 
     public async Task<List<TemplateEntity>> SearchAsync(string query)
     {
-        return await _context.Templates.AsNoTracking()
+        return await _dbContext.Templates.AsNoTracking()
             .Where(t => t.Name.Contains(query) || t.Subject.Contains(query) || t.Body.Contains(query))
             .ToListAsync();
     }
 
     public async Task<TemplateEntity> UpdateAsync(Guid id, Template template)
     {
-        var templateEntity = await _context.Templates.FindAsync(id)
+        var templateEntity = await _dbContext.Templates.FindAsync(id)
             ?? throw new KeyNotFoundException($"Template with ID {id} not found.");
         templateEntity.Name = template.Name;
         templateEntity.Subject = template.Subject;
         templateEntity.Body = template.Body;
 
-        _context.Templates.Update(templateEntity);
-        await _context.SaveChangesAsync();
-
+        _dbContext.Templates.Update(templateEntity);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.Entry(templateEntity).State = EntityState.Detached;
         return templateEntity;
     }
 }

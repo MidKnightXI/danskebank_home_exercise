@@ -26,6 +26,7 @@ public class CustomerRepository : ICustomerRepository
         };
         await _dbContext.Customers.AddAsync(customerEntity);
         await _dbContext.SaveChangesAsync();
+        _dbContext.Entry(customerEntity).State = EntityState.Detached;
         return customerEntity;
     }
 
@@ -64,7 +65,7 @@ public class CustomerRepository : ICustomerRepository
 
         _dbContext.Customers.Update(customerEntity);
         await _dbContext.SaveChangesAsync();
-
+        _dbContext.Entry(customerEntity).State = EntityState.Detached;
         return customerEntity;
     }
 }
