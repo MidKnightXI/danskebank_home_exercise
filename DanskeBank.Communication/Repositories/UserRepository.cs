@@ -15,7 +15,7 @@ public class UserRepository : IUserRepository
         _dbContext = dbContext;
     }
 
-    public async Task AddAsync(User user)
+    public async Task<UserEntity> AddAsync(User user)
     {
         var userEntity = new UserEntity
         {
@@ -25,6 +25,8 @@ public class UserRepository : IUserRepository
         };
         await _dbContext.Users.AddAsync(userEntity);
         await _dbContext.SaveChangesAsync();
+        _dbContext.Entry(userEntity).State = EntityState.Detached;
+        return userEntity;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -53,7 +55,7 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task UpdateAsync(Guid id, User user)
+    public async Task<UserEntity> UpdateAsync(Guid id, User user)
     {
         var userEntity = await _dbContext.Users.FindAsync(id)
             ?? throw new KeyNotFoundException($"User with ID {id} not found.");
@@ -62,5 +64,7 @@ public class UserRepository : IUserRepository
 
         _dbContext.Users.Update(userEntity);
         await _dbContext.SaveChangesAsync();
+        _dbContext.Entry(userEntity).State = EntityState.Detached;
+        return userEntity;
     }
 }

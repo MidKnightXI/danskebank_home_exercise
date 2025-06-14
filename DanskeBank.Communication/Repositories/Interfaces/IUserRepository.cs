@@ -6,8 +6,8 @@ namespace DanskeBank.Communication.Repositories.Interfaces;
 public interface IUserRepository
 {
     Task<UserEntity> GetByIdAsync(Guid id);
-    Task AddAsync(User user);
-    Task UpdateAsync(Guid id, User user);
+    Task<UserEntity> AddAsync(User user);
+    Task<UserEntity> UpdateAsync(Guid id, User user);
     Task DeleteAsync(Guid id);
     Task<List<UserEntity>> SearchAsync(string query);
     Task<List<UserEntity>> ListAsync();
