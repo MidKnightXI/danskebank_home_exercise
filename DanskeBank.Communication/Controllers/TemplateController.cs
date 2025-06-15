@@ -191,7 +191,8 @@ public class TemplateController : ControllerBase
                 .Replace("{{CustomerName}}", customer.Name)
                 .Replace("{{CustomerEmail}}", customer.Email);
 
-            _logger.LogInformation($"Sending template '{template.Name}' to customer '{customer.Name}' ({customer.Email}) with body: {template.Body}");
+            _logger.LogInformation("Sending template '{TemplateName}' to customer '{CustomerName}' ({CustomerEmail}) with body: {TemplateBody}",
+                template.Name, customer.Name, customer.Email, template.Body);
 
             return Ok(new BaseResponse
             {
