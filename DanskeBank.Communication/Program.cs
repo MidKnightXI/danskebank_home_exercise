@@ -45,11 +45,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers();
 
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 }
@@ -63,6 +60,15 @@ builder.Services.AddDbContext<CommunicationDbContext>(options =>
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ITemplateRepository, TemplateRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DanskeBank.Communication v1"));
+}
 
 app.UseRouting();
 
