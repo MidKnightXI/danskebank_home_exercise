@@ -67,7 +67,7 @@ Once the API is running, go to [https://localhost:7079/swagger](https://localhos
 
 ## Authentication
 
-Most endpoints require a JWT in the header: `Authorization: Bearer <token>`.
+Most endpoints require a JWT in the header, formatted as `Authorization: Bearer <token>`. However, there are exceptions: the user creation endpoint is exempt from this requirement for testing purposes, but it would require admin authentication in a production environment. Additionally, the authentication-related endpoints always permit anonymous access.
 
 ## Main Dependencies
 - Microsoft.AspNetCore.Authentication.JwtBearer
