@@ -2,10 +2,12 @@ using DanskeBank.Communication.Extensions;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DanskeBank.Communication.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/templates")]
 public class TemplateController : ControllerBase

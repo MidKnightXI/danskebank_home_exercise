@@ -3,12 +3,14 @@ using DanskeBank.Communication.Extensions;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DanskeBank.Communication.Controllers;
 
-// technically, this controller should be in a separate microservice if we were in a microservices architecture
+// this controller should be in a separate microservice if we were in a microservices architecture
 
+[Authorize]
 [ApiController]
 [Route("api/v1/users")]
 public class UserController : ControllerBase
@@ -73,6 +75,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult<UserResponse>> CreateUser([FromBody] User user)
     {
         try
