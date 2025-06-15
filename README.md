@@ -35,7 +35,7 @@ The API will be available at `https://localhost:7079` or `http://localhost:5052`
 
 ## Configuration
 
-Settings (JWT key, SQLite connection string, etc.) are in `DanskeBank.Communication/appsettings.json`.
+You can configure the JWT settings in `DanskeBank.Communication/appsettings.json`.
 
 ## API Documentation (Swagger)
 
