@@ -120,7 +120,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
             var result = await controller.DeleteCustomer(id);
-            Assert.IsType<NoContentResult>(result);
+            Assert.IsType<NoContentResult>(result.Result);
         }
 
         [Fact]
@@ -131,7 +131,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
             var result = await controller.DeleteCustomer(Guid.NewGuid());
-            Assert.IsType<NotFoundObjectResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
         [Fact]
