@@ -7,6 +7,7 @@ using DanskeBank.Communication.Databases;
 using DanskeBank.Communication.Repositories;
 using DanskeBank.Communication.Repositories.Interfaces;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,7 @@ builder.Services.AddControllers();
 
 if (builder.Environment.IsDevelopment())
 {
+    // Add Swagger only in development environment
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -117,6 +119,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHttpMetrics();
+
 app.MapControllers();
+app.MapMetrics();
 
 app.Run();

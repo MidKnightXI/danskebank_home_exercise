@@ -73,6 +73,7 @@ Most endpoints require a JWT in the header, formatted as `Authorization: Bearer 
 - Microsoft.AspNetCore.Authentication.JwtBearer
 - Microsoft.EntityFrameworkCore.Sqlite
 - Swashbuckle.AspNetCore (Swagger)
+- prometheus-net.AspNetCore (metrics)
 
 ## Test Dependencies
 - Microsoft.NET.Test.Sdk
@@ -109,6 +110,10 @@ docker run -p 8080:80 danskebank-communication
 ```
 
 The API will be available at `http://localhost:8080` (inside the container it listens on port 80).
+
+## Prometheus Metrics
+
+This application exposes a Prometheus-compatible metrics endpoint at `/metrics`.
 
 ---
 
