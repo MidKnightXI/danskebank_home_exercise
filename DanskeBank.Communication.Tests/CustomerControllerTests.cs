@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DanskeBank.Communication.Controllers;
 using DanskeBank.Communication.Databases;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace DanskeBank.Communication.Tests
 {
