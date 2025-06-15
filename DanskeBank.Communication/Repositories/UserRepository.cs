@@ -2,6 +2,7 @@ using DanskeBank.Communication.Databases;
 using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Repositories.Interfaces;
+using DanskeBank.Communication.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace DanskeBank.Communication.Repositories;
@@ -21,7 +22,7 @@ public class UserRepository : IUserRepository
         {
             Id = Guid.NewGuid(),
             Email = user.Email,
-            Password = user.Password,
+            Password = PasswordHasher.HashPassword(user.Password),
         };
         await _dbContext.Users.AddAsync(userEntity);
         await _dbContext.SaveChangesAsync();
@@ -60,11 +61,16 @@ public class UserRepository : IUserRepository
         var userEntity = await _dbContext.Users.FindAsync(id)
             ?? throw new KeyNotFoundException($"User with ID {id} not found.");
         userEntity.Email = user.Email;
-        userEntity.Password = user.Password;
+        userEntity.Password = PasswordHasher.HashPassword(user.Password);
 
         _dbContext.Users.Update(userEntity);
         await _dbContext.SaveChangesAsync();
         _dbContext.Entry(userEntity).State = EntityState.Detached;
         return userEntity;
+    }
+
+    public async Task<UserEntity?> GetByEmailAsync(string email)
+    {
+        return await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
     }
 }

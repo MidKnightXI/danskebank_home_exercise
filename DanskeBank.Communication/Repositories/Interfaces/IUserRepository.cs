@@ -11,4 +11,5 @@ public interface IUserRepository
     Task DeleteAsync(Guid id);
     Task<List<UserEntity>> SearchAsync(string query);
     Task<List<UserEntity>> ListAsync();
+    Task<UserEntity?> GetByEmailAsync(string email);
 }
