@@ -74,6 +74,15 @@ Most endpoints require a JWT in the header: `Authorization: Bearer <token>`.
 - Microsoft.EntityFrameworkCore.Sqlite
 - Swashbuckle.AspNetCore (Swagger)
 
+## Test Dependencies
+- Microsoft.NET.Test.Sdk
+- xunit
+- xunit.runner.visualstudio
+- coverlet.collector
+- Microsoft.EntityFrameworkCore.InMemory
+- System.Net.Http
+- System.Text.RegularExpressions
+
 ## Tests
 
 To run unit tests:
