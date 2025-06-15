@@ -1,4 +1,3 @@
-using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Extensions;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Models.Responses;
@@ -46,7 +45,7 @@ public class CustomerController : ControllerBase
         try
         {
             var customer = await _customerRepository.GetByIdAsync(id);
-          return Ok(new CustomerResponse()
+          return Ok(new CustomerResponse
             {
                 Success = true,
                 Customer = customer.ToDto()
@@ -54,7 +53,7 @@ public class CustomerController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new CustomerResponse()
+            return StatusCode(500, new CustomerResponse
             {
                 Success = false,
                 Message = ex.Message
@@ -67,7 +66,7 @@ public class CustomerController : ControllerBase
     {
         if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
         {
-            return BadRequest(new CustomerResponse()
+            return BadRequest(new CustomerResponse
             {
                 Success = false,
                 Message = "Invalid customer data."
@@ -84,7 +83,7 @@ public class CustomerController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new CustomerResponse()
+            return StatusCode(500, new CustomerResponse
             {
                 Success = false,
                 Message = ex.Message
@@ -98,7 +97,7 @@ public class CustomerController : ControllerBase
         try
         {
             var customerEntity = await _customerRepository.UpdateAsync(id, customer);
-            return Ok(new CustomerResponse()
+            return Ok(new CustomerResponse
             {
                 Success = true,
                 Customer = customerEntity.ToDto()
@@ -106,7 +105,7 @@ public class CustomerController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return NotFound(new CustomerResponse()
+            return NotFound(new CustomerResponse
             {
                 Success = false,
                 Message = $"Customer with ID {id} not found."
@@ -114,7 +113,7 @@ public class CustomerController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new CustomerResponse()
+            return StatusCode(500, new CustomerResponse
             {
                 Success = false,
                 Message = ex.Message
@@ -123,7 +122,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteCustomer(Guid id)
+    public async Task<ActionResult<BaseResponse>> DeleteCustomer(Guid id)
     {
         try
         {
@@ -132,11 +131,19 @@ public class CustomerController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return NotFound(new { Success = false, Message = $"Customer with ID {id} not found." });
+            return NotFound(new BaseResponse
+            {
+                Success = false,
+                Message = $"Customer with ID {id} not found."
+            });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Success = false, ex.Message });
+            return StatusCode(500, new BaseResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
         }
     }
 
