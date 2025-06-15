@@ -61,7 +61,7 @@ namespace DanskeBank.Communication.Tests
             var result = await controller.GetCustomer(Guid.NewGuid());
             Assert.IsType<ObjectResult>(result.Result);
             var objectResult = result.Result as ObjectResult;
-            Assert.Equal(500, objectResult.StatusCode);
+            Assert.Equal(500, objectResult?.StatusCode);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.CreateCustomer(null);
+            var result = await controller.CreateCustomer(null!);
             Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
