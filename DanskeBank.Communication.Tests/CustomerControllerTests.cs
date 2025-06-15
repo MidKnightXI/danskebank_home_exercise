@@ -9,7 +9,7 @@ namespace DanskeBank.Communication.Tests
 {
     public class CustomerControllerTests
     {
-        private CommunicationDbContext GetDbContext(string dbName)
+        private static CommunicationDbContext GetDbContext(string dbName)
         {
             var options = new DbContextOptionsBuilder<CommunicationDbContext>()
                 .UseInMemoryDatabase(databaseName: dbName)
