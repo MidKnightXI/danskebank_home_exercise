@@ -1,6 +1,5 @@
 using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
-using System.Threading;
 
 namespace DanskeBank.Communication.Repositories.Interfaces;
 

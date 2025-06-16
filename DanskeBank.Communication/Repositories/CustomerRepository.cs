@@ -1,9 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-
 using DanskeBank.Communication.Databases;
 using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DanskeBank.Communication.Repositories;
 
