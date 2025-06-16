@@ -10,5 +10,5 @@ public interface ITemplateRepository
     Task<TemplateEntity> UpdateAsync(Guid id, Template template);
     Task DeleteAsync(Guid id);
     Task<List<TemplateEntity>> SearchAsync(string query);
-    Task<List<TemplateEntity>> ListAsync();
+    Task<(List<TemplateEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize);
 }

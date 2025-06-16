@@ -38,11 +38,6 @@ public class CustomerRepository : ICustomerRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<CustomerEntity>> ListAsync()
-    {
-        return await _dbContext.Customers.AsNoTracking().ToListAsync();
-    }
-
     public async Task<CustomerEntity> GetByIdAsync(Guid id)
     {
         return await _dbContext.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id)
@@ -67,5 +62,13 @@ public class CustomerRepository : ICustomerRepository
         await _dbContext.SaveChangesAsync();
         _dbContext.Entry(customerEntity).State = EntityState.Detached;
         return customerEntity;
+    }
+
+    public async Task<(List<CustomerEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize)
+    {
+        var query = _dbContext.Customers.AsNoTracking();
+        var totalCount = await query.CountAsync();
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return (items, totalCount);
     }
 }

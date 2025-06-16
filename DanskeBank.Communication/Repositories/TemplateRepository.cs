@@ -45,11 +45,6 @@ public class TemplateRepository : ITemplateRepository
             ?? throw new KeyNotFoundException($"Template with ID {id} not found.");
     }
 
-    public async Task<List<TemplateEntity>> ListAsync()
-    {
-        return await _dbContext.Templates.AsNoTracking().ToListAsync();
-    }
-
     public async Task<List<TemplateEntity>> SearchAsync(string query)
     {
         return await _dbContext.Templates.AsNoTracking()
@@ -69,5 +64,13 @@ public class TemplateRepository : ITemplateRepository
         await _dbContext.SaveChangesAsync();
         _dbContext.Entry(templateEntity).State = EntityState.Detached;
         return templateEntity;
+    }
+
+    public async Task<(List<TemplateEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize)
+    {
+        var query = _dbContext.Templates.AsNoTracking();
+        var totalCount = await query.CountAsync();
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return (items, totalCount);
     }
 }

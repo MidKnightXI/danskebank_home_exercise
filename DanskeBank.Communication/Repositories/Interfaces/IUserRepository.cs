@@ -10,6 +10,6 @@ public interface IUserRepository
     Task<UserEntity> UpdateAsync(Guid id, User user);
     Task DeleteAsync(Guid id);
     Task<List<UserEntity>> SearchAsync(string query);
-    Task<List<UserEntity>> ListAsync();
     Task<UserEntity?> GetByEmailAsync(string email);
+    Task<(List<UserEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize);
 }

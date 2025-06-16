@@ -44,11 +44,6 @@ public class UserRepository : IUserRepository
             ?? throw new KeyNotFoundException($"User with ID {id} not found.");
     }
 
-    public async Task<List<UserEntity>> ListAsync()
-    {
-        return await _dbContext.Users.AsNoTracking().ToListAsync();
-    }
-
     public async Task<List<UserEntity>> SearchAsync(string query)
     {
         return await _dbContext.Users.AsNoTracking()
@@ -72,5 +67,13 @@ public class UserRepository : IUserRepository
     public async Task<UserEntity?> GetByEmailAsync(string email)
     {
         return await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<(List<UserEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize)
+    {
+        var query = _dbContext.Users.AsNoTracking();
+        var totalCount = await query.CountAsync();
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return (items, totalCount);
     }
 }

@@ -10,5 +10,5 @@ public interface ICustomerRepository
     Task<CustomerEntity> UpdateAsync(Guid id, Customer customer);
     Task DeleteAsync(Guid id);
     Task<List<CustomerEntity>> SearchAsync(string query);
-    Task<List<CustomerEntity>> ListAsync();
+    Task<(List<CustomerEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize);
 }
