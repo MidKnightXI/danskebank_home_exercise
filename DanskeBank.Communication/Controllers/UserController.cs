@@ -37,7 +37,7 @@ public class UserController : ControllerBase
             {
                 Success = true,
                 Users = users.ToDtoList(),
-                Count = totalCount,
+                TotalItems = totalCount,
                 Next = next,
                 Previous = previous
             });

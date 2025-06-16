@@ -42,7 +42,7 @@ public class TemplateController : ControllerBase
             {
                 Success = true,
                 Templates = templates.ToDtoList(),
-                Count = totalCount,
+                TotalItems = totalCount,
                 Next = next,
                 Previous = previous
             });

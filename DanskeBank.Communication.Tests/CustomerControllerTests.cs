@@ -57,7 +57,7 @@ namespace DanskeBank.Communication.Tests
             var response = Assert.IsType<PaginatedCustomersResponse>(ok.Value);
             Assert.True(response.Success);
             Assert.Equal(10, response.Customers?.Count);
-            Assert.Equal(25, response.Count);
+            Assert.Equal(25, response.TotalItems);
             Assert.Equal("https://example.com/api/customers?page=2&pageSize=10", response.Next);
             Assert.Null(response.Previous);
         }
@@ -85,7 +85,7 @@ namespace DanskeBank.Communication.Tests
             var response = Assert.IsType<PaginatedCustomersResponse>(ok.Value);
             Assert.True(response.Success);
             Assert.Equal(5, response.Customers?.Count);
-            Assert.Equal(25, response.Count);
+            Assert.Equal(25, response.TotalItems);
             Assert.Null(response.Next);
             Assert.Equal("https://example.com/api/customers?page=2&pageSize=10", response.Previous);
         }
@@ -121,7 +121,7 @@ namespace DanskeBank.Communication.Tests
             var skip = (expectedPage - 1) * expectedPageSize;
             var expectedCount = Math.Max(0, Math.Min(15 - skip, expectedPageSize));
             Assert.Equal(expectedCount, response.Customers?.Count);
-            Assert.Equal(15, response.Count);
+            Assert.Equal(15, response.TotalItems);
 
             // Verify next link
             if (expectedPage * expectedPageSize < 15)

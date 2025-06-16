@@ -59,7 +59,7 @@ namespace DanskeBank.Communication.Tests
             var response = Assert.IsType<PaginatedTemplatesResponse>(ok.Value);
             Assert.True(response.Success);
             Assert.Equal(10, response.Templates?.Count);
-            Assert.Equal(30, response.Count);
+            Assert.Equal(30, response.TotalItems);
             Assert.Equal("https://example.com/api/templates?page=2&pageSize=10", response.Next);
             Assert.Null(response.Previous);
         }
@@ -82,7 +82,7 @@ namespace DanskeBank.Communication.Tests
             var response = Assert.IsType<PaginatedTemplatesResponse>(ok.Value);
             Assert.True(response.Success);
             Assert.Equal(8, response.Templates?.Count);
-            Assert.Equal(8, response.Count);
+            Assert.Equal(8, response.TotalItems);
             Assert.Null(response.Next);
             Assert.Null(response.Previous);
         }
@@ -110,7 +110,7 @@ namespace DanskeBank.Communication.Tests
             var skip = (expectedPage - 1) * expectedPageSize;
             var expectedCount = Math.Max(0, Math.Min(12 - skip, expectedPageSize));
             Assert.Equal(expectedCount, response.Templates?.Count);
-            Assert.Equal(12, response.Count);
+            Assert.Equal(12, response.TotalItems);
         }
 
         [Fact]

@@ -51,7 +51,7 @@ namespace DanskeBank.Communication.Tests
             var response = Assert.IsType<PaginatedUsersResponse>(ok.Value);
             Assert.True(response.Success);
             Assert.Equal(5, response.Users?.Count);
-            Assert.Equal(12, response.Count);
+            Assert.Equal(12, response.TotalItems);
             Assert.Equal("https://example.com/api/users?page=3&pageSize=5", response.Next);
             Assert.Equal("https://example.com/api/users?page=1&pageSize=5", response.Previous);
         }
@@ -78,7 +78,7 @@ namespace DanskeBank.Communication.Tests
             var skip = (expectedPage - 1) * expectedPageSize;
             var expectedCount = Math.Max(0, Math.Min(9 - skip, expectedPageSize));
             Assert.Equal(expectedCount, response.Users?.Count);
-            Assert.Equal(9, response.Count);
+            Assert.Equal(9, response.TotalItems);
         }
 
         [Fact]
