@@ -179,9 +179,9 @@ namespace DanskeBank.Communication.Tests
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
             var result = await controller.GetCustomer(Guid.NewGuid(), CancellationToken.None);
-            Assert.IsType<ObjectResult>(result.Result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
             var objectResult = result.Result as ObjectResult;
-            Assert.Equal(500, objectResult?.StatusCode);
+            Assert.Equal(404, objectResult?.StatusCode);
         }
 
         [Fact]
