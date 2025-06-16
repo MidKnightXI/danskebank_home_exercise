@@ -4,6 +4,23 @@
 
 This project is a .NET 8 REST API for sending personalized messages to customers using templates. It uses JWT for authentication, Entity Framework Core with SQLite for persistence, and exposes its documentation via Swagger.
 
+## Domain Models and Validation
+
+### Customer
+- **Name**: String, 2 to 64 characters (required)
+- **Email**: Valid email format, up to 320 characters (required)
+
+### Template
+- **Name**: String, 2 to 64 characters (required)
+- **Subject**: String, 3 to 128 characters (required)
+- **Body**: String, 0 to 1024 characters (required)
+
+### User
+- **Email**: Valid email format, up to 320 characters (required)
+- **Password**: String, 6 to 32 characters (required)
+
+All fields are validated server-side according to these constraints. Any attempt to create or update a model that does not meet these requirements will result in a validation error.
+
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
