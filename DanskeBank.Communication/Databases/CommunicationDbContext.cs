@@ -18,5 +18,6 @@ public class CommunicationDbContext : DbContext
         modelBuilder.Entity<CustomerEntity>().HasIndex(c => c.Id).IsUnique();
         modelBuilder.Entity<TemplateEntity>().HasIndex(t => t.Id).IsUnique();
         modelBuilder.Entity<UserEntity>().HasIndex(u => u.Id).IsUnique();
+        modelBuilder.Entity<UserEntity>().HasIndex(u => u.Email).IsUnique();
     }
 }
