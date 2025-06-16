@@ -62,6 +62,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    // todo: add a huge rate limit to prevent abuses
     [HttpPost("refresh")]
     public ActionResult<LoginResponse> Refresh([FromBody] string refreshToken, CancellationToken cancellationToken)
     {
