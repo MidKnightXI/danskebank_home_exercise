@@ -23,20 +23,28 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<UsersResponse>> GetUsers()
+    public async Task<ActionResult<PaginatedUsersResponse>> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
         try
         {
-            var users = await _userRepository.ListAsync();
-            return Ok(new UsersResponse
+            var (users, totalCount) = await _userRepository.ListPaginatedAsync(page, pageSize);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
+            string? next = (page * pageSize < totalCount) ? $"{baseUrl}?page={page + 1}&pageSize={pageSize}" : null;
+            string? previous = (page > 1) ? $"{baseUrl}?page={page - 1}&pageSize={pageSize}" : null;
+            return Ok(new PaginatedUsersResponse
             {
                 Success = true,
                 Users = users.ToDtoList(),
+                Count = totalCount,
+                Next = next,
+                Previous = previous
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new UsersResponse
+            return StatusCode(500, new PaginatedUsersResponse
             {
                 Success = false,
                 Message = ex.Message

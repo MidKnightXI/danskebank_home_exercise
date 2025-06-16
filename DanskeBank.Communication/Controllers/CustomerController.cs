@@ -20,20 +20,28 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<CustomersResponse>> GetCustomers()
+    public async Task<ActionResult<PaginatedCustomersResponse>> GetCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
         try
         {
-            var customers = await _customerRepository.ListAsync();
-            return Ok(new CustomersResponse
+            var (customers, totalCount) = await _customerRepository.ListPaginatedAsync(page, pageSize);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
+            string? next = (page * pageSize < totalCount) ? $"{baseUrl}?page={page + 1}&pageSize={pageSize}" : null;
+            string? previous = (page > 1) ? $"{baseUrl}?page={page - 1}&pageSize={pageSize}" : null;
+            return Ok(new PaginatedCustomersResponse
             {
                 Success = true,
-                Customers = customers.ToDtoList()
+                Customers = customers.ToDtoList(),
+                Count = totalCount,
+                Next = next,
+                Previous = previous
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new CustomersResponse
+            return StatusCode(500, new PaginatedCustomersResponse
             {
                 Success = false,
                 Message = ex.Message
@@ -128,7 +136,7 @@ public class CustomerController : ControllerBase
     {
         try
         {
-            await _customerRepository.GetByIdAsync(id);
+            await _customerRepository.DeleteAsync(id);
             return NoContent();
         }
         catch (KeyNotFoundException)

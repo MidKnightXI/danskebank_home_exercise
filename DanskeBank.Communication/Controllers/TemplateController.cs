@@ -28,20 +28,28 @@ public class TemplateController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<TemplatesResponse>> GetTemplates()
+    public async Task<ActionResult<PaginatedTemplatesResponse>> GetTemplates([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
         try
         {
-            var templates = await _templateRepository.ListAsync();
-            return Ok(new TemplatesResponse
+            var (templates, totalCount) = await _templateRepository.ListPaginatedAsync(page, pageSize);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
+            string? next = (page * pageSize < totalCount) ? $"{baseUrl}?page={page + 1}&pageSize={pageSize}" : null;
+            string? previous = (page > 1) ? $"{baseUrl}?page={page - 1}&pageSize={pageSize}" : null;
+            return Ok(new PaginatedTemplatesResponse
             {
                 Success = true,
-                Templates = templates.ToDtoList()
+                Templates = templates.ToDtoList(),
+                Count = totalCount,
+                Next = next,
+                Previous = previous
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new TemplatesResponse
+            return StatusCode(500, new PaginatedTemplatesResponse
             {
                 Success = false,
                 Message = ex.Message
