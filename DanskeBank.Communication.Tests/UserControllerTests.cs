@@ -1,7 +1,11 @@
 using DanskeBank.Communication.Controllers;
 using DanskeBank.Communication.Databases;
+using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories;
+using DanskeBank.Communication.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,18 +23,82 @@ namespace DanskeBank.Communication.Tests
             return context;
         }
 
+        private static UserController CreateController(IUserRepository repo)
+        {
+            var controller = new UserController(repo);
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Scheme = "https";
+            httpContext.Request.Host = new HostString("example.com");
+            httpContext.Request.Path = "/api/users";
+            controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+            return controller;
+        }
+
         [Fact]
-        public async Task GetUsers_ReturnsOkResult()
+        public async Task GetUsers_Pagination_WorksCorrectly()
         {
             var dbName = Guid.NewGuid().ToString();
             using var context = GetDbContext(dbName);
-            context.Users.Add(new Databases.Entities.UserEntity { Id = Guid.NewGuid(), Email = "user@example.com", Password = "pass" });
+            for (int i = 1; i <= 12; i++)
+                context.Users.Add(new UserEntity { Id = Guid.NewGuid(), Email = $"User{i}@example.com", Password = "pass" });
             context.SaveChanges();
+
             var repo = new UserRepository(context);
-            var controller = new UserController(repo);
-            var result = await controller.GetUsers();
-            Assert.IsType<OkObjectResult>(result.Result);
+            var controller = CreateController(repo);
+            var result = await controller.GetUsers(page: 2, pageSize: 5);
+
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<PaginatedUsersResponse>(ok.Value);
+            Assert.True(response.Success);
+            Assert.Equal(5, response.Users?.Count);
+            Assert.Equal(12, response.Count);
+            Assert.Equal("https://example.com/api/users?page=3&pageSize=5", response.Next);
+            Assert.Equal("https://example.com/api/users?page=1&pageSize=5", response.Previous);
         }
+
+        [Theory]
+        [InlineData(0, 3, 1, 3)]
+        [InlineData(2, 0, 2, 10)]
+        public async Task GetUsers_InvalidPageOrSize_ClampsToDefaults(int page, int pageSize, int expectedPage, int expectedPageSize)
+        {
+            var dbName = Guid.NewGuid().ToString();
+            using var context = GetDbContext(dbName);
+            for (int i = 1; i <= 9; i++)
+                context.Users.Add(new UserEntity { Id = Guid.NewGuid(), Email = $"User{i}@example.com", Password = "pass" });
+            context.SaveChanges();
+
+            var repo = new UserRepository(context);
+            var controller = CreateController(repo);
+            var result = await controller.GetUsers(page: page, pageSize: pageSize);
+
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<PaginatedUsersResponse>(ok.Value);
+            Assert.True(response.Success);
+
+            var skip = (expectedPage - 1) * expectedPageSize;
+            var expectedCount = Math.Max(0, Math.Min(9 - skip, expectedPageSize));
+            Assert.Equal(expectedCount, response.Users?.Count);
+            Assert.Equal(9, response.Count);
+        }
+
+        [Fact]
+        public async Task GetUsers_RepositoryThrows_ReturnsInternalServerError()
+        {
+            var dbName = Guid.NewGuid().ToString();
+            using var context = GetDbContext(dbName);
+            context.Dispose();
+            var repo = new UserRepository(context);
+            var controller = CreateController(repo);
+
+            var actionResult = await controller.GetUsers();
+
+            var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var response = Assert.IsType<PaginatedUsersResponse>(objectResult.Value);
+            Assert.False(response.Success);
+            Assert.Contains("disposed", response.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
 
         [Fact]
         public async Task GetUser_ReturnsOk_WhenFound()

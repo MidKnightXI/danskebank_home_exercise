@@ -1,7 +1,11 @@
 using DanskeBank.Communication.Controllers;
 using DanskeBank.Communication.Databases;
+using DanskeBank.Communication.Databases.Entities;
 using DanskeBank.Communication.Models;
+using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories;
+using DanskeBank.Communication.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,17 +23,138 @@ namespace DanskeBank.Communication.Tests
             return context;
         }
 
-        [Fact]
-        public async Task GetCustomers_ReturnsOkResult()
+        private static CustomerController CreateController(ICustomerRepository repo)
         {
+            var controller = new CustomerController(repo);
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Scheme = "https";
+            httpContext.Request.Host = new HostString("example.com");
+            httpContext.Request.Path = "/api/customers";
+            controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+            return controller;
+        }
+
+        [Fact]
+        public async Task GetCustomers_DefaultPaging_ReturnsOkWithLinks()
+        {
+            // Arrange
             var dbName = Guid.NewGuid().ToString();
             using var context = GetDbContext(dbName);
-            context.Customers.Add(new Databases.Entities.CustomerEntity { Id = Guid.NewGuid(), Name = "John", Email = "john@example.com" });
+            // seed 25 customers
+            for (int i = 1; i <= 25; i++)
+            {
+                context.Customers.Add(new CustomerEntity { Id = Guid.NewGuid(), Name = $"Name{i}", Email = $"{i}@mail.com" });
+            }
             context.SaveChanges();
             var repo = new CustomerRepository(context);
-            var controller = new CustomerController(repo);
+            var controller = CreateController(repo);
+
+            // Act
             var result = await controller.GetCustomers();
-            Assert.IsType<OkObjectResult>(result.Result);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<PaginatedCustomersResponse>(ok.Value);
+            Assert.True(response.Success);
+            Assert.Equal(10, response.Customers?.Count);
+            Assert.Equal(25, response.Count);
+            Assert.Equal("https://example.com/api/customers?page=2&pageSize=10", response.Next);
+            Assert.Null(response.Previous);
+        }
+
+        [Fact]
+        public async Task GetCustomers_LastPage_NoNextLink()
+        {
+            // Arrange
+            var dbName = Guid.NewGuid().ToString();
+            using var context = GetDbContext(dbName);
+            // seed 25 customers
+            for (int i = 1; i <= 25; i++)
+            {
+                context.Customers.Add(new CustomerEntity { Id = Guid.NewGuid(), Name = $"Name{i}", Email = $"{i}@mail.com" });
+            }
+            context.SaveChanges();
+            var repo = new CustomerRepository(context);
+            var controller = CreateController(repo);
+
+            // Act
+            var result = await controller.GetCustomers(page: 3, pageSize: 10);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<PaginatedCustomersResponse>(ok.Value);
+            Assert.True(response.Success);
+            Assert.Equal(5, response.Customers?.Count);
+            Assert.Equal(25, response.Count);
+            Assert.Null(response.Next);
+            Assert.Equal("https://example.com/api/customers?page=2&pageSize=10", response.Previous);
+        }
+
+        [Theory]
+        [InlineData(0, 5, 1, 5)]
+        [InlineData(5, 0, 5, 10)]
+        [InlineData(-1, -1, 1, 10)]
+        public async Task GetCustomers_InvalidPageOrSize_ClampsToDefaults(
+            int page, int pageSize, int expectedPage, int expectedPageSize)
+        {
+            // Arrange
+            var dbName = Guid.NewGuid().ToString();
+            using var context = GetDbContext(dbName);
+            // seed 15 customers for testing
+            for (int i = 1; i <= 15; i++)
+            {
+                context.Customers.Add(new CustomerEntity { Id = Guid.NewGuid(), Name = $"Name{i}", Email = $"{i}@mail.com" });
+            }
+            context.SaveChanges();
+            var repo = new CustomerRepository(context);
+            var controller = CreateController(repo);
+
+            // Act
+            var result = await controller.GetCustomers(page: page, pageSize: pageSize);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<PaginatedCustomersResponse>(ok.Value);
+            Assert.True(response.Success);
+
+            // Calculate expected count
+            var skip = (expectedPage - 1) * expectedPageSize;
+            var expectedCount = Math.Max(0, Math.Min(15 - skip, expectedPageSize));
+            Assert.Equal(expectedCount, response.Customers?.Count);
+            Assert.Equal(15, response.Count);
+
+            // Verify next link
+            if (expectedPage * expectedPageSize < 15)
+                Assert.Equal($"https://example.com/api/customers?page={expectedPage + 1}&pageSize={expectedPageSize}", response.Next);
+            else
+                Assert.Null(response.Next);
+
+            // Verify previous link
+            if (expectedPage > 1)
+                Assert.Equal($"https://example.com/api/customers?page={expectedPage - 1}&pageSize={expectedPageSize}", response.Previous);
+            else
+                Assert.Null(response.Previous);
+        }
+
+        [Fact]
+        public async Task GetCustomers_RepositoryThrows_ReturnsInternalServerError()
+        {
+            // Arrange
+            var dbName = Guid.NewGuid().ToString();
+            using var context = GetDbContext(dbName);
+            context.Dispose();
+            var repo = new CustomerRepository(context);
+            var controller = CreateController(repo);
+
+            // Act
+            var actionResult = await controller.GetCustomers();
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var response = Assert.IsType<PaginatedCustomersResponse>(objectResult.Value);
+            Assert.False(response.Success);
+            Assert.Contains("disposed", response.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
