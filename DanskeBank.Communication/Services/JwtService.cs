@@ -64,4 +64,26 @@ public class JwtService
         );
         return (new JwtSecurityTokenHandler().WriteToken(token), expires);
     }
+
+    public JwtSecurityToken? ValidateRefreshToken(string refreshToken)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _issuer,
+            ValidAudience = _audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret))
+        };
+        handler.ValidateToken(refreshToken, validationParameters, out var validatedToken);
+        if (validatedToken is not JwtSecurityToken jwt || jwt.ValidTo < DateTime.UtcNow)
+            return null;
+        var typClaim = jwt.Claims.FirstOrDefault(c => c.Type == "typ")?.Value;
+        if (typClaim is not "refresh")
+            return null;
+        return jwt;
+    }
 }

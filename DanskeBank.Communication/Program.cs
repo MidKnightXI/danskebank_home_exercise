@@ -8,6 +8,9 @@ using DanskeBank.Communication.Repositories;
 using DanskeBank.Communication.Repositories.Interfaces;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using System.Threading.RateLimiting;
+using DanskeBank.Communication.Models.Responses;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +95,56 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ITemplateRepository, TemplateRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+// Add built-in rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("RefreshTokenPolicy", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: key => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(60),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }
+        )
+    );
+    options.AddPolicy("LoginPolicy", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: key => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(60),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }
+        )
+    );
+    options.OnRejected = (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        if (context.HttpContext.Request.Path.StartsWithSegments("/api/v1/auth/refresh")
+            || context.HttpContext.Request.Path.StartsWithSegments("/api/v1/auth/login"))
+        {
+            var response = JsonSerializer.Serialize(new LoginResponse
+            {
+                Success = false,
+                Message = "Too many requests. Please try again later."
+            });
+            return new ValueTask(context.HttpContext.Response.WriteAsync(response, cancellationToken));
+        }
+        context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(new BaseResponse
+        {
+            Success = false,
+            Message = "Too many requests. Please try again later."
+        }), cancellationToken);
+        return ValueTask.CompletedTask;
+    };
+});
+
 var app = builder.Build();
 
 var scope = app.Services.CreateScope();
@@ -120,6 +173,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpMetrics();
+app.UseRateLimiter();
 
 app.MapControllers();
 app.MapMetrics();
