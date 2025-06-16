@@ -53,7 +53,7 @@ namespace DanskeBank.Communication.Tests
             var templateRepo = new TemplateRepository(context);
             var customerRepo = new CustomerRepository(context);
             var controller = CreateController(templateRepo, customerRepo);
-            var result = await controller.GetTemplates();
+            var result = await controller.GetTemplates(CancellationToken.None);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<PaginatedTemplatesResponse>(ok.Value);
@@ -76,7 +76,7 @@ namespace DanskeBank.Communication.Tests
             var templateRepo = new TemplateRepository(context);
             var customerRepo = new CustomerRepository(context);
             var controller = CreateController(templateRepo, customerRepo);
-            var result = await controller.GetTemplates(page: 0, pageSize: 20);
+            var result = await controller.GetTemplates(CancellationToken.None, page: 0, pageSize: 20);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<PaginatedTemplatesResponse>(ok.Value);
@@ -101,7 +101,7 @@ namespace DanskeBank.Communication.Tests
             var templateRepo = new TemplateRepository(context);
             var customerRepo = new CustomerRepository(context);
             var controller = CreateController(templateRepo, customerRepo);
-            var result = await controller.GetTemplates(page: page, pageSize: pageSize);
+            var result = await controller.GetTemplates(CancellationToken.None, page: page, pageSize: pageSize);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<PaginatedTemplatesResponse>(ok.Value);
@@ -123,7 +123,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var controller = CreateController(templateRepo, customerRepo);
 
-            var actionResult = await controller.GetTemplates();
+            var actionResult = await controller.GetTemplates(CancellationToken.None);
 
             var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
             Assert.Equal(500, objectResult.StatusCode);
@@ -144,7 +144,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.GetTemplate(id);
+            var result = await controller.GetTemplate(id, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -157,7 +157,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.GetTemplate(Guid.NewGuid());
+            var result = await controller.GetTemplate(Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -171,7 +171,7 @@ namespace DanskeBank.Communication.Tests
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
             var template = new Template { Name = "T1", Subject = "S1", Body = "B1" };
-            var result = await controller.CreateTemplate(template);
+            var result = await controller.CreateTemplate(template, CancellationToken.None);
             Assert.IsType<CreatedAtActionResult>(result.Result);
         }
 
@@ -188,7 +188,7 @@ namespace DanskeBank.Communication.Tests
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
             var template = new Template { Name = "T2", Subject = "S2", Body = "B2" };
-            var result = await controller.UpdateTemplate(id, template);
+            var result = await controller.UpdateTemplate(id, template, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -202,7 +202,7 @@ namespace DanskeBank.Communication.Tests
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
             var template = new Template { Name = "T2", Subject = "S2", Body = "B2" };
-            var result = await controller.UpdateTemplate(Guid.NewGuid(), template);
+            var result = await controller.UpdateTemplate(Guid.NewGuid(), template, CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -218,7 +218,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.DeleteTemplate(id);
+            var result = await controller.DeleteTemplate(id, CancellationToken.None);
             Assert.IsType<NoContentResult>(result.Result);
         }
 
@@ -231,7 +231,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.DeleteTemplate(Guid.NewGuid());
+            var result = await controller.DeleteTemplate(Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -246,7 +246,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.SearchTemplates("T1");
+            var result = await controller.SearchTemplates("T1", CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -264,7 +264,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.SendTemplate(templateId, customerId);
+            var result = await controller.SendTemplate(templateId, customerId, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -280,7 +280,7 @@ namespace DanskeBank.Communication.Tests
             var customerRepo = new CustomerRepository(context);
             var logger = GetLogger();
             var controller = new TemplateController(logger, templateRepo, customerRepo);
-            var result = await controller.SendTemplate(templateId, Guid.NewGuid());
+            var result = await controller.SendTemplate(templateId, Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
     }

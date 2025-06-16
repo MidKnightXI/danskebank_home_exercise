@@ -28,13 +28,13 @@ public class TemplateController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedTemplatesResponse>> GetTemplates([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PaginatedTemplatesResponse>> GetTemplates(CancellationToken cancellationToken, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 10;
         try
         {
-            var (templates, totalCount) = await _templateRepository.ListPaginatedAsync(page, pageSize);
+            var (templates, totalCount) = await _templateRepository.ListPaginatedAsync(page, pageSize, cancellationToken);
             var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
             string? next = (page * pageSize < totalCount) ? $"{baseUrl}?page={page + 1}&pageSize={pageSize}" : null;
             string? previous = (page > 1) ? $"{baseUrl}?page={page - 1}&pageSize={pageSize}" : null;
@@ -58,11 +58,11 @@ public class TemplateController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TemplateResponse>> GetTemplate(Guid id)
+    public async Task<ActionResult<TemplateResponse>> GetTemplate(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var template = await _templateRepository.GetByIdAsync(id);
+            var template = await _templateRepository.GetByIdAsync(id, cancellationToken);
             return Ok(new TemplateResponse
             {
                 Success = true,
@@ -88,11 +88,11 @@ public class TemplateController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TemplateResponse>> CreateTemplate([FromBody] Template template)
+    public async Task<ActionResult<TemplateResponse>> CreateTemplate([FromBody] Template template, CancellationToken cancellationToken)
     {
         try
         {
-            var templateEntity = await _templateRepository.AddAsync(template);
+            var templateEntity = await _templateRepository.AddAsync(template, cancellationToken);
 
             return CreatedAtAction(nameof(GetTemplate), new { id = templateEntity.Id }, new TemplateResponse
             {
@@ -111,11 +111,11 @@ public class TemplateController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<TemplateResponse>> UpdateTemplate(Guid id, [FromBody] Template template)
+    public async Task<ActionResult<TemplateResponse>> UpdateTemplate(Guid id, [FromBody] Template template, CancellationToken cancellationToken)
     {
         try
         {
-            var templateEntity = await _templateRepository.UpdateAsync(id, template);
+            var templateEntity = await _templateRepository.UpdateAsync(id, template, cancellationToken);
 
             return Ok(new TemplateResponse
             {
@@ -142,11 +142,11 @@ public class TemplateController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<BaseResponse>> DeleteTemplate(Guid id)
+    public async Task<ActionResult<BaseResponse>> DeleteTemplate(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            await _templateRepository.DeleteAsync(id);
+            await _templateRepository.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException)
@@ -168,11 +168,11 @@ public class TemplateController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<TemplatesResponse>> SearchTemplates([FromQuery] string query)
+    public async Task<ActionResult<TemplatesResponse>> SearchTemplates([FromQuery] string query, CancellationToken cancellationToken)
     {
         try
         {
-            var templates = await _templateRepository.SearchAsync(query);
+            var templates = await _templateRepository.SearchAsync(query, cancellationToken);
             return Ok(new TemplatesResponse
             {
                 Success = true,
@@ -190,12 +190,12 @@ public class TemplateController : ControllerBase
     }
 
     [HttpPost("{templateId}/send/{customerId}")]
-    public async Task<ActionResult<BaseResponse>> SendTemplate(Guid templateId, Guid customerId)
+    public async Task<ActionResult<BaseResponse>> SendTemplate(Guid templateId, Guid customerId, CancellationToken cancellationToken)
     {
         try
         {
-            var template = await _templateRepository.GetByIdAsync(templateId);
-            var customer = await _customerRepository.GetByIdAsync(customerId);
+            var template = await _templateRepository.GetByIdAsync(templateId, cancellationToken);
+            var customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
 
             template.Body = template.Body
                 .Replace("{{CustomerName}}", customer.Name)

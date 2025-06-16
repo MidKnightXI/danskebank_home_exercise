@@ -23,38 +23,70 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResponse>> Login([FromBody] User user)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] User user, CancellationToken cancellationToken)
     {
-        var userEntity = await _userRepository.GetByEmailAsync(user.Email);
-        if (userEntity == null || !PasswordHasher.VerifyPassword(user.Password, userEntity.Password))
+        try
         {
-            return Unauthorized(new LoginResponse { Success = false, Message = "Invalid credentials" });
+
+            var userEntity = await _userRepository.GetByEmailAsync(user.Email, cancellationToken);
+            if (userEntity == null || !PasswordHasher.VerifyPassword(user.Password, userEntity.Password))
+            {
+                return Unauthorized(new LoginResponse { Success = false, Message = "Invalid credentials" });
+            }
+            var (token, expiresAt) = _jwtService.GenerateToken(userEntity.Id.ToString(), userEntity.Email);
+            var (refreshToken, refreshTokenExpiresAt) = _jwtService.GenerateRefreshToken(userEntity.Id.ToString(), userEntity.Email);
+            return Ok(new LoginResponse
+            {
+                Success = true,
+                Token = token,
+                ExpiresAt = expiresAt,
+                RefreshToken = refreshToken,
+                RefreshTokenExpiresAt = refreshTokenExpiresAt
+            });
         }
-        var (token, expiresAt) = _jwtService.GenerateToken(userEntity.Id.ToString(), userEntity.Email);
-        var (refreshToken, refreshTokenExpiresAt) = _jwtService.GenerateRefreshToken(userEntity.Id.ToString(), userEntity.Email);
-        return Ok(new LoginResponse
+        catch (KeyNotFoundException)
         {
-            Success = true,
-            Token = token,
-            ExpiresAt = expiresAt,
-            RefreshToken = refreshToken,
-            RefreshTokenExpiresAt = refreshTokenExpiresAt
-        });
+            return Unauthorized(new LoginResponse
+            {
+                Success = false,
+                Message = "User not found"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new LoginResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpPost("refresh")]
-    public ActionResult<LoginResponse> Refresh([FromBody] string refreshToken)
+    public ActionResult<LoginResponse> Refresh([FromBody] string refreshToken, CancellationToken cancellationToken)
     {
         var handler = new JwtSecurityTokenHandler();
         try
         {
             var jwt = handler.ReadJwtToken(refreshToken);
-            if (jwt == null || jwt.ValidTo < DateTime.UtcNow)
-                return Unauthorized(new LoginResponse { Success = false, Message = "Refresh token expired or invalid" });
+            if (jwt is null || jwt.ValidTo < DateTime.UtcNow)
+            {
+                return Unauthorized(new LoginResponse
+                {
+                    Success = false,
+                    Message = "Refresh token expired or invalid"
+                });
+            }
             var userId = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
             var email = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value;
-            if (userId == null || email == null)
-                return Unauthorized(new LoginResponse { Success = false, Message = "Invalid refresh token" });
+            if (userId is null || email is null)
+            {
+                return Unauthorized(new LoginResponse
+                {
+                    Success = false,
+                    Message = "Invalid refresh token"
+                });
+            }
             var (token, expiresAt) = _jwtService.GenerateToken(userId, email);
             var (newRefreshToken, newRefreshTokenExpiresAt) = _jwtService.GenerateRefreshToken(userId, email);
             return Ok(new LoginResponse

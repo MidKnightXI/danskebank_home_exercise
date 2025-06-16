@@ -45,7 +45,7 @@ namespace DanskeBank.Communication.Tests
 
             var repo = new UserRepository(context);
             var controller = CreateController(repo);
-            var result = await controller.GetUsers(page: 2, pageSize: 5);
+            var result = await controller.GetUsers(CancellationToken.None, page: 2, pageSize: 5);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<PaginatedUsersResponse>(ok.Value);
@@ -69,7 +69,7 @@ namespace DanskeBank.Communication.Tests
 
             var repo = new UserRepository(context);
             var controller = CreateController(repo);
-            var result = await controller.GetUsers(page: page, pageSize: pageSize);
+            var result = await controller.GetUsers(CancellationToken.None, page: page, pageSize: pageSize);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<PaginatedUsersResponse>(ok.Value);
@@ -90,7 +90,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new UserRepository(context);
             var controller = CreateController(repo);
 
-            var actionResult = await controller.GetUsers();
+            var actionResult = await controller.GetUsers(CancellationToken.None);
 
             var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
             Assert.Equal(500, objectResult.StatusCode);
@@ -110,7 +110,7 @@ namespace DanskeBank.Communication.Tests
             context.SaveChanges();
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
-            var result = await controller.GetUser(id);
+            var result = await controller.GetUser(id, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -121,7 +121,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
-            var result = await controller.GetUser(Guid.NewGuid());
+            var result = await controller.GetUser(Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -133,7 +133,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
             var user = new User { Email = "newuser@example.com", Password = "pass" };
-            var result = await controller.CreateUser(user);
+            var result = await controller.CreateUser(user, CancellationToken.None);
             Assert.IsType<CreatedAtActionResult>(result.Result);
         }
 
@@ -148,7 +148,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
             var user = new User { Email = "updated@example.com", Password = "newpass" };
-            var result = await controller.UpdateUser(id, user);
+            var result = await controller.UpdateUser(id, user, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -160,7 +160,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
             var user = new User { Email = "updated@example.com", Password = "newpass" };
-            var result = await controller.UpdateUser(Guid.NewGuid(), user);
+            var result = await controller.UpdateUser(Guid.NewGuid(), user, CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -174,7 +174,7 @@ namespace DanskeBank.Communication.Tests
             context.SaveChanges();
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
-            var result = await controller.DeleteUser(id);
+            var result = await controller.DeleteUser(id, CancellationToken.None);
             Assert.IsType<NoContentResult>(result);
         }
 
@@ -185,7 +185,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new UserRepository(context);
             var controller = new UserController(repo);
-            var result = await controller.DeleteUser(Guid.NewGuid());
+            var result = await controller.DeleteUser(Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result);
         }
     }

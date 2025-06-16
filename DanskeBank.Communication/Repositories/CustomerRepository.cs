@@ -16,7 +16,7 @@ public class CustomerRepository : ICustomerRepository
         _dbContext = dbContext;
     }
 
-    public async Task<CustomerEntity> AddAsync(Customer customer)
+    public async Task<CustomerEntity> AddAsync(Customer customer, CancellationToken cancellationToken)
     {
         var customerEntity = new CustomerEntity
         {
@@ -24,51 +24,51 @@ public class CustomerRepository : ICustomerRepository
             Name = customer.Name,
             Email = customer.Email
         };
-        await _dbContext.Customers.AddAsync(customerEntity);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.Customers.AddAsync(customerEntity, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
         _dbContext.Entry(customerEntity).State = EntityState.Detached;
         return customerEntity;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        var customerEntity = await _dbContext.Customers.FindAsync(id)
+        var customerEntity = await _dbContext.Customers.FindAsync(new object[] { id }, cancellationToken)
             ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
         _dbContext.Customers.Remove(customerEntity);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<CustomerEntity> GetByIdAsync(Guid id)
+    public async Task<CustomerEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _dbContext.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id)
+        return await _dbContext.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
     }
 
-    public async Task<List<CustomerEntity>> SearchAsync(string query)
+    public async Task<List<CustomerEntity>> SearchAsync(string query, CancellationToken cancellationToken)
     {
         return await _dbContext.Customers.AsNoTracking()
             .Where(c => c.Name.Contains(query) || c.Email.Contains(query))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<CustomerEntity> UpdateAsync(Guid id, Customer customer)
+    public async Task<CustomerEntity> UpdateAsync(Guid id, Customer customer, CancellationToken cancellationToken)
     {
-        var customerEntity = await _dbContext.Customers.FindAsync(id)
+        var customerEntity = await _dbContext.Customers.FindAsync(new object[] { id }, cancellationToken)
             ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
         customerEntity.Name = customer.Name;
         customerEntity.Email = customer.Email;
 
         _dbContext.Customers.Update(customerEntity);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
         _dbContext.Entry(customerEntity).State = EntityState.Detached;
         return customerEntity;
     }
 
-    public async Task<(List<CustomerEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize)
+    public async Task<(List<CustomerEntity> Items, int TotalCount)> ListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
         var query = _dbContext.Customers.AsNoTracking();
-        var totalCount = await query.CountAsync();
-        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return (items, totalCount);
     }
 }

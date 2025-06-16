@@ -45,7 +45,7 @@ namespace DanskeBank.Communication.Tests
             var jwtService = GetJwtService();
             var controller = new AuthController(repo, jwtService);
             var user = new User { Email = userEntity.Email, Password = password };
-            var result = await controller.Login(user);
+            var result = await controller.Login(user, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
             var response = (result.Result as OkObjectResult)?.Value as LoginResponse;
             Assert.True(response?.Success);
@@ -61,7 +61,7 @@ namespace DanskeBank.Communication.Tests
             var jwtService = GetJwtService();
             var controller = new AuthController(repo, jwtService);
             var user = new User { Email = "notfound@example.com", Password = "password" };
-            var result = await controller.Login(user);
+            var result = await controller.Login(user, CancellationToken.None);
             Assert.IsType<UnauthorizedObjectResult>(result.Result);
             var response = (result.Result as UnauthorizedObjectResult)?.Value as LoginResponse;
             Assert.False(response?.Success);
@@ -84,7 +84,7 @@ namespace DanskeBank.Communication.Tests
             var jwtService = GetJwtService();
             var controller = new AuthController(repo, jwtService);
             var user = new User { Email = userEntity.Email, Password = "wrongpassword" };
-            var result = await controller.Login(user);
+            var result = await controller.Login(user, CancellationToken.None);
             Assert.IsType<UnauthorizedObjectResult>(result.Result);
             var response = (result.Result as UnauthorizedObjectResult)?.Value as LoginResponse;
             Assert.False(response?.Success);
@@ -99,7 +99,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new UserRepository(context);
             var controller = new AuthController(repo, jwtService);
-            var result = controller.Refresh(refreshToken);
+            var result = controller.Refresh(refreshToken, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
             var response = (result.Result as OkObjectResult)?.Value as LoginResponse;
             Assert.True(response?.Success);
@@ -114,7 +114,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new UserRepository(context);
             var controller = new AuthController(repo, jwtService);
-            var result = controller.Refresh("invalidtoken");
+            var result = controller.Refresh("invalidtoken", CancellationToken.None);
             Assert.IsType<UnauthorizedObjectResult>(result.Result);
             var response = (result.Result as UnauthorizedObjectResult)?.Value as LoginResponse;
             Assert.False(response?.Success);

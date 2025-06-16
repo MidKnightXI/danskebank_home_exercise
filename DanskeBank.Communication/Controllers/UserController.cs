@@ -23,13 +23,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedUsersResponse>> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PaginatedUsersResponse>> GetUsers(CancellationToken cancellationToken, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 10;
         try
         {
-            var (users, totalCount) = await _userRepository.ListPaginatedAsync(page, pageSize);
+            var (users, totalCount) = await _userRepository.ListPaginatedAsync(page, pageSize, cancellationToken);
             var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
             string? next = (page * pageSize < totalCount) ? $"{baseUrl}?page={page + 1}&pageSize={pageSize}" : null;
             string? previous = (page > 1) ? $"{baseUrl}?page={page - 1}&pageSize={pageSize}" : null;
@@ -53,11 +53,11 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserEntity>> GetUser(Guid id)
+    public async Task<ActionResult<UserEntity>> GetUser(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
             return Ok(new UserResponse
             {
                 Success = true,
@@ -84,11 +84,11 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<ActionResult<UserResponse>> CreateUser([FromBody] User user)
+    public async Task<ActionResult<UserResponse>> CreateUser([FromBody] User user, CancellationToken cancellationToken)
     {
         try
         {
-            var userEntity = await _userRepository.AddAsync(user);
+            var userEntity = await _userRepository.AddAsync(user, cancellationToken);
             return CreatedAtAction(nameof(GetUser), new { id = userEntity.Id }, new UserResponse
             {
                 Success = true,
@@ -106,11 +106,11 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<UserResponse>> UpdateUser(Guid id, [FromBody] User user)
+    public async Task<ActionResult<UserResponse>> UpdateUser(Guid id, [FromBody] User user, CancellationToken cancellationToken)
     {
         try
         {
-            var userEntity = await _userRepository.UpdateAsync(id, user);
+            var userEntity = await _userRepository.UpdateAsync(id, user, cancellationToken);
             return Ok(new UserResponse
             {
                 Success = true,
@@ -136,11 +136,11 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteUser(Guid id)
+    public async Task<ActionResult> DeleteUser(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            await _userRepository.DeleteAsync(id);
+            await _userRepository.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException)

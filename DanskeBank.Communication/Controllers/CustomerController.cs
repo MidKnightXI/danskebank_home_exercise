@@ -20,13 +20,13 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedCustomersResponse>> GetCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PaginatedCustomersResponse>> GetCustomers(CancellationToken cancellationToken, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 10;
         try
         {
-            var (customers, totalCount) = await _customerRepository.ListPaginatedAsync(page, pageSize);
+            var (customers, totalCount) = await _customerRepository.ListPaginatedAsync(page, pageSize, cancellationToken);
             var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
             string? next = (page * pageSize < totalCount) ? $"{baseUrl}?page={page + 1}&pageSize={pageSize}" : null;
             string? previous = (page > 1) ? $"{baseUrl}?page={page - 1}&pageSize={pageSize}" : null;
@@ -50,11 +50,11 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id)
+    public async Task<ActionResult<CustomerResponse>> GetCustomer(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var customer = await _customerRepository.GetByIdAsync(id);
+            var customer = await _customerRepository.GetByIdAsync(id, cancellationToken);
           return Ok(new CustomerResponse
             {
                 Success = true,
@@ -72,7 +72,7 @@ public class CustomerController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CustomerResponse>> CreateCustomer([FromBody] Customer customer)
+    public async Task<ActionResult<CustomerResponse>> CreateCustomer([FromBody] Customer customer, CancellationToken cancellationToken)
     {
         if (customer == null || string.IsNullOrEmpty(customer.Name) || string.IsNullOrEmpty(customer.Email))
         {
@@ -84,7 +84,7 @@ public class CustomerController : ControllerBase
         }
         try
         {
-            var customerEntity = await _customerRepository.AddAsync(customer);
+            var customerEntity = await _customerRepository.AddAsync(customer, cancellationToken);
             return CreatedAtAction(nameof(GetCustomer), new { id = customerEntity.Id }, new CustomerResponse()
             {
                 Success = true,
@@ -102,11 +102,11 @@ public class CustomerController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<CustomerResponse>> UpdateCustomer(Guid id, [FromBody] Customer customer)
+    public async Task<ActionResult<CustomerResponse>> UpdateCustomer(Guid id, [FromBody] Customer customer, CancellationToken cancellationToken)
     {
         try
         {
-            var customerEntity = await _customerRepository.UpdateAsync(id, customer);
+            var customerEntity = await _customerRepository.UpdateAsync(id, customer, cancellationToken);
             return Ok(new CustomerResponse
             {
                 Success = true,
@@ -132,11 +132,11 @@ public class CustomerController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<BaseResponse>> DeleteCustomer(Guid id)
+    public async Task<ActionResult<BaseResponse>> DeleteCustomer(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            await _customerRepository.DeleteAsync(id);
+            await _customerRepository.DeleteAsync(id, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException)
@@ -158,11 +158,11 @@ public class CustomerController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<CustomersResponse>> SearchCustomers([FromQuery] string query)
+    public async Task<ActionResult<CustomersResponse>> SearchCustomers([FromQuery] string query, CancellationToken cancellationToken)
     {
         try
         {
-            var customers = await _customerRepository.SearchAsync(query);
+            var customers = await _customerRepository.SearchAsync(query, cancellationToken);
             return Ok(new CustomersResponse
             {
                 Success = true,

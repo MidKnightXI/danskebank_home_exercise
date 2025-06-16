@@ -50,7 +50,7 @@ namespace DanskeBank.Communication.Tests
             var controller = CreateController(repo);
 
             // Act
-            var result = await controller.GetCustomers();
+            var result = await controller.GetCustomers(CancellationToken.None);
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
@@ -78,7 +78,7 @@ namespace DanskeBank.Communication.Tests
             var controller = CreateController(repo);
 
             // Act
-            var result = await controller.GetCustomers(page: 3, pageSize: 10);
+            var result = await controller.GetCustomers(CancellationToken.None, page: 3, pageSize: 10);
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
@@ -110,7 +110,7 @@ namespace DanskeBank.Communication.Tests
             var controller = CreateController(repo);
 
             // Act
-            var result = await controller.GetCustomers(page: page, pageSize: pageSize);
+            var result = await controller.GetCustomers(CancellationToken.None, page: page, pageSize: pageSize);
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result.Result);
@@ -147,7 +147,7 @@ namespace DanskeBank.Communication.Tests
             var controller = CreateController(repo);
 
             // Act
-            var actionResult = await controller.GetCustomers();
+            var actionResult = await controller.GetCustomers(CancellationToken.None);
 
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
@@ -167,7 +167,7 @@ namespace DanskeBank.Communication.Tests
             context.SaveChanges();
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.GetCustomer(id);
+            var result = await controller.GetCustomer(id, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -178,7 +178,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.GetCustomer(Guid.NewGuid());
+            var result = await controller.GetCustomer(Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<ObjectResult>(result.Result);
             var objectResult = result.Result as ObjectResult;
             Assert.Equal(500, objectResult?.StatusCode);
@@ -191,7 +191,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.CreateCustomer(null!);
+            var result = await controller.CreateCustomer(null!, CancellationToken.None);
             Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
@@ -203,7 +203,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
             var customer = new Customer { Name = "John", Email = "john@example.com" };
-            var result = await controller.CreateCustomer(customer);
+            var result = await controller.CreateCustomer(customer, CancellationToken.None);
             Assert.IsType<CreatedAtActionResult>(result.Result);
         }
 
@@ -218,7 +218,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
             var customer = new Customer { Name = "Jane", Email = "jane@example.com" };
-            var result = await controller.UpdateCustomer(id, customer);
+            var result = await controller.UpdateCustomer(id, customer, CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
 
@@ -230,7 +230,7 @@ namespace DanskeBank.Communication.Tests
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
             var customer = new Customer { Name = "Jane", Email = "jane@example.com" };
-            var result = await controller.UpdateCustomer(Guid.NewGuid(), customer);
+            var result = await controller.UpdateCustomer(Guid.NewGuid(), customer, CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -244,7 +244,7 @@ namespace DanskeBank.Communication.Tests
             context.SaveChanges();
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.DeleteCustomer(id);
+            var result = await controller.DeleteCustomer(id, CancellationToken.None);
             Assert.IsType<NoContentResult>(result.Result);
         }
 
@@ -255,7 +255,7 @@ namespace DanskeBank.Communication.Tests
             using var context = GetDbContext(dbName);
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.DeleteCustomer(Guid.NewGuid());
+            var result = await controller.DeleteCustomer(Guid.NewGuid(), CancellationToken.None);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
@@ -268,7 +268,7 @@ namespace DanskeBank.Communication.Tests
             context.SaveChanges();
             var repo = new CustomerRepository(context);
             var controller = new CustomerController(repo);
-            var result = await controller.SearchCustomers("John");
+            var result = await controller.SearchCustomers("John", CancellationToken.None);
             Assert.IsType<OkObjectResult>(result.Result);
         }
     }
