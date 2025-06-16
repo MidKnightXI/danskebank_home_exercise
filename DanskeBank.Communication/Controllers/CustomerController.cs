@@ -34,7 +34,7 @@ public class CustomerController : ControllerBase
             {
                 Success = true,
                 Customers = customers.ToDtoList(),
-                Count = totalCount,
+                TotalItems = totalCount,
                 Next = next,
                 Previous = previous
             });
@@ -55,10 +55,18 @@ public class CustomerController : ControllerBase
         try
         {
             var customer = await _customerRepository.GetByIdAsync(id, cancellationToken);
-          return Ok(new CustomerResponse
+            return Ok(new CustomerResponse
             {
                 Success = true,
                 Customer = customer.ToDto()
+            });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new CustomerResponse
+            {
+                Success = false,
+                Message = $"Customer with ID {id} not found."
             });
         }
         catch (Exception ex)
