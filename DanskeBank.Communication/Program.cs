@@ -12,7 +12,9 @@ using System.Threading.RateLimiting;
 using DanskeBank.Communication.Models.Responses;
 using System.Text.Json;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // JWT configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -48,7 +50,25 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+// Mailing service configuration
+var mailingSettings = builder.Configuration.GetSection("Mailing");
+var enabled = bool.Parse(mailingSettings["Enabled"] ?? "false");
+var smtpServer = mailingSettings["SmtpServer"];
+var smtpPort = int.Parse(mailingSettings["SmtpPort"] ?? "587");
+var smtpUser = mailingSettings["SmtpUser"];
+var smtpPassword = mailingSettings["SmtpPassword"];
+
+if (string.IsNullOrEmpty(smtpServer) || string.IsNullOrEmpty(smtpUser) || string.IsNullOrEmpty(smtpPassword))
+{
+    throw new InvalidOperationException("Mailing configuration is missing or incomplete.");
+}
+
+builder.Services.AddSingleton(new MailingService(smtpServer, smtpPort, smtpUser, smtpPassword));
+
+
 builder.Services.AddControllers();
+
 
 if (builder.Environment.IsDevelopment())
 {
@@ -85,15 +105,18 @@ if (builder.Environment.IsDevelopment())
     });
 }
 
+
 // databases
 builder.Services.AddDbContext<CommunicationDbContext>(options =>
     options.UseSqlite("Data Source=communication.db")
 );
 
+
 // repositories
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ITemplateRepository, TemplateRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 // Add built-in rate limiting
 builder.Services.AddRateLimiter(options =>
@@ -145,7 +168,9 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
+
 var app = builder.Build();
+
 
 var scope = app.Services.CreateScope();
 try

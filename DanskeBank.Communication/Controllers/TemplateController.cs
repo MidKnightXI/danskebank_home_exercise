@@ -2,6 +2,7 @@ using DanskeBank.Communication.Extensions;
 using DanskeBank.Communication.Models;
 using DanskeBank.Communication.Models.Responses;
 using DanskeBank.Communication.Repositories.Interfaces;
+using DanskeBank.Communication.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,16 +14,19 @@ namespace DanskeBank.Communication.Controllers;
 public class TemplateController : ControllerBase
 {
     private readonly ILogger<TemplateController> _logger;
+    private readonly MailingService _mailingService;
     private readonly ITemplateRepository _templateRepository;
     private readonly ICustomerRepository _customerRepository;
 
     public TemplateController(
         ILogger<TemplateController> logger,
+        MailingService mailingService,
         ITemplateRepository templateRepository,
         ICustomerRepository customerRepository
     )
     {
         _logger = logger;
+        _mailingService = mailingService;
         _templateRepository = templateRepository;
         _customerRepository = customerRepository;
     }
@@ -197,12 +201,12 @@ public class TemplateController : ControllerBase
             var template = await _templateRepository.GetByIdAsync(templateId, cancellationToken);
             var customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
 
-            template.Body = template.Body
-                .Replace("{{CustomerName}}", customer.Name)
-                .Replace("{{CustomerEmail}}", customer.Email);
+            template.Body = _mailingService.FormatEmailBody(template.Body, customer);
 
             _logger.LogInformation("Sending template '{TemplateName}' to customer '{CustomerName}' ({CustomerEmail}) with body: {TemplateBody}",
                 template.Name, customer.Name, customer.Email, template.Body);
+
+            await _mailingService.SendEmailAsync(template.Subject, template.Body, customer.Email, cancellationToken);
 
             return Ok(new BaseResponse
             {
