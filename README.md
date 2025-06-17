@@ -45,7 +45,7 @@ dotnet restore
 
 ```bash
 cd DanskeBank.Communication
-dotnet run
+sudo dotnet run
 ```
 
 The API will be available at `https://localhost:7079` or `http://localhost:5052` by default (see `launchSettings.json`).
