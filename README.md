@@ -56,7 +56,7 @@ You can configure the JWT settings in `DanskeBank.Communication/appsettings.json
 
 ## API Documentation (Swagger)
 
-Once the API is running, go to [https://localhost:7079/swagger](https://localhost:7079/swagger) to explore and test all endpoints via Swagger UI.
+Once the API is running, go to [http://localhost:5052/swagger](http://localhost:5052/swagger) to explore and test all endpoints via Swagger UI.
 
 ## Main Endpoints
 
