@@ -70,7 +70,7 @@ public class TemplateRepository : ITemplateRepository
     {
         var query = _dbContext.Templates.AsNoTracking();
         var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var items = await query.OrderBy(c => c.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         return (items, totalCount);
     }
 }
