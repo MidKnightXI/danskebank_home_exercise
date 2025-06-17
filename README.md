@@ -4,6 +4,8 @@
 
 This project is a .NET 8 REST API for sending personalized messages to customers using templates. It uses JWT for authentication, Entity Framework Core with SQLite for persistence, and exposes its documentation via Swagger.
 
+> **Note:** Before you can log in and access protected endpoints, you must first create a user account using the `POST /api/v1/users` endpoint. Once your user is created, you can log in and use your JWT to access the other endpoints.
+
 ## Domain Models and Validation
 
 ### Customer
