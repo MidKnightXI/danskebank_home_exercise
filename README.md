@@ -138,6 +138,28 @@ The API will be available at `http://localhost:8080` (inside the container it li
 
 This application exposes a Prometheus-compatible metrics endpoint at `/metrics`.
 
+## Email Body Formatting
+
+The `Body` field of email templates must be written in **HTML**. This allows you to send rich, well-formatted emails to your customers.
+
+- Use standard HTML tags (`<p>`, `<b>`, `<a>`, etc.) to structure your content.
+- Avoid JavaScript or complex CSS styles (many email clients do not support them).
+- You can insert dynamic variables into the HTML body, which will be replaced when sending.
+
+**Available dynamic variables:**
+- `{{Customer.Name}}`
+- `{{Customer.Email}}`
+
+**Example HTML body:**
+
+```html
+<p>Hello <b>{{Customer.Name}}</b>,</p>
+<p>Your registered email is: {{Customer.Email}}</p>
+<p>Thank you for using our service!</p>
+```
+
+The HTML content will be sent as-is in the email body. Always check the rendering in an email client before sending to your users.
+
 ---
 
 For any questions, refer to the source code or the automatically generated Swagger documentation.
