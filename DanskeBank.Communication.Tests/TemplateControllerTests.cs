@@ -25,6 +25,12 @@ namespace DanskeBank.Communication.Tests
             return context;
         }
 
+        /// <summary>
+        /// Creates a new TemplateController with a setted up HttpContext for the paginated response.<br/>
+        /// This is necessary to generate the correct links in the response.
+        /// </summary>
+        /// <param name="templateRepo">The template repository to use.</param>
+        /// <param name="customerRepo">The customer repository to use.</param>
         private static TemplateController CreateController(ITemplateRepository templateRepo, ICustomerRepository customerRepo)
         {
             var logger = new LoggerFactory().CreateLogger<TemplateController>();

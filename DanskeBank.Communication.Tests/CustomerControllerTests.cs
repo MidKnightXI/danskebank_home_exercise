@@ -23,6 +23,11 @@ namespace DanskeBank.Communication.Tests
             return context;
         }
 
+        /// <summary>
+        /// Creates a new CustomerController with a setted up HttpContext for the paginated response.<br/>
+        /// This is necessary to generate the correct links in the response.
+        /// </summary>
+        /// <param name="repo"></param>
         private static CustomerController CreateController(ICustomerRepository repo)
         {
             var controller = new CustomerController(repo);
