@@ -147,15 +147,19 @@ The `Body` field of email templates must be written in **HTML**. This allows you
 - You can insert dynamic variables into the HTML body, which will be replaced when sending.
 
 **Available dynamic variables:**
-- `{{Customer.Name}}`
-- `{{Customer.Email}}`
+- `{{Customer.Name}}` — The customer's name
+- `{{Customer.Email}}` — The customer's email address
+- `{{Customer.CensoredEmail}}` — The customer's email address, partially censored for privacy
+- `{{Sender.Email}}` — The sender's (SMTP user) email address
+- `{{Date}}` — The current date in `yyyy-MM-dd` format (UTC)
 
 **Example HTML body:**
 
 ```html
 <p>Hello <b>{{Customer.Name}}</b>,</p>
 <p>Your registered email is: {{Customer.Email}}</p>
-<p>Thank you for using our service!</p>
+<p>Masked email: {{Customer.CensoredEmail}}</p>
+<p>This message was sent by: {{Sender.Email}} on {{Date}}</p>
 ```
 
 The HTML content will be sent as-is in the email body. Always check the rendering in an email client before sending to your users.

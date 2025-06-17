@@ -21,11 +21,29 @@ public class MailingService
         Enabled = enabled;
     }
 
+    private static string CensorEmail(string email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            return string.Empty;
+        }
+        var atIndex = email.IndexOf('@');
+        if (atIndex < 2)
+        {
+            return email;
+        }
+        var censoredPart = new string('*', atIndex - 1);
+        return $"{email[0]}{censoredPart}{email.Substring(atIndex)}";
+    }
+
     public string FormatEmailBody(string body, CustomerEntity customer)
     {
         return body
             .Replace("{{Customer.Name}}", customer.Name)
-            .Replace("{{Customer.Email}}", customer.Email);
+            .Replace("{{Customer.Email}}", customer.Email)
+            .Replace("{{Customer.CensoredEmail}}", CensorEmail(customer.Email))
+            .Replace("{{Sender.Email}}", _smtpUser)
+            .Replace("{{Date}}", DateTime.UtcNow.ToString("yyyy-MM-dd"));
     }
 
     public async Task SendEmailAsync(string subject, string body, string toEmail, CancellationToken cancellationToken = default)
